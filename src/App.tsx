@@ -142,6 +142,18 @@ function WhaleBrainApp() {
     audioRef.current = new Audio();
   }, []);
 
+  useEffect(() => {
+    const ambient = document.getElementById('ambient-audio') as HTMLAudioElement;
+    if (ambient) {
+      if (soundEnabled) {
+        ambient.volume = 0.05;
+        ambient.play().catch(() => { });
+      } else {
+        ambient.pause();
+      }
+    }
+  }, [soundEnabled]);
+
   // Play audio via ElevenLabs TTS
   const playWhaleAudio = async (text: string) => {
     if (!soundEnabled || !audioRef.current) return;
@@ -266,6 +278,11 @@ function WhaleBrainApp() {
   };
 
   const selectCoin = async (coinId: string) => {
+    if (coinId.length >= 30) {
+      setQuery(coinId);
+      analyzeAddress(coinId);
+      return;
+    }
     const cached = getCachedResult(coinId);
     if (cached) {
       setSelectedCoin(cached.coin);
@@ -281,6 +298,10 @@ function WhaleBrainApp() {
     try {
       const res = await fetch(`/api/coin?id=${coinId}`);
       const data: CoinData = await res.json();
+
+      if (!res.ok || (data as any)['error'] || !data.name) {
+        throw new Error('CoinFetchError');
+      }
       setSelectedCoin(data);
 
       const analysisResult = await analyzeCoin(data, degenMode, 'token', quickMode);
@@ -303,10 +324,11 @@ function WhaleBrainApp() {
     }
   };
 
-  const analyzeAddress = async () => {
-    if (!query.startsWith('0x')) return;
+  const analyzeAddress = async (overrideAddress?: any) => {
+    const targetAddress = typeof overrideAddress === 'string' ? overrideAddress : query;
+    if (targetAddress.length < 30) return;
 
-    const cached = getCachedResult(query);
+    const cached = getCachedResult(targetAddress);
     if (cached) {
       setSelectedCoin(cached.coin);
       setAnalysis(cached.analysis);
@@ -317,9 +339,9 @@ function WhaleBrainApp() {
     try {
       const type = activeTab === 'contracts' ? 'contract' : 'wallet';
       const analysisResult = await analyzeCoin({
-        name: query,
+        name: targetAddress,
         symbol: type,
-        id: query,
+        id: targetAddress,
         image: { large: WHALE_IMAGE },
         market_data: {
           current_price: { usd: 0 },
@@ -334,21 +356,21 @@ function WhaleBrainApp() {
 
       const coinData: CoinData = {
         name: activeTab === 'contracts' ? 'Contrato Inteligente' : 'Billetera Crypto',
-        symbol: query.slice(0, 6) + '...' + query.slice(-4),
-        id: query,
+        symbol: targetAddress.slice(0, 6) + '...' + targetAddress.slice(-4),
+        id: targetAddress,
         image: { large: WHALE_IMAGE, small: WHALE_IMAGE, thumb: WHALE_IMAGE },
         market_data: { current_price: { usd: 0 }, price_change_percentage_24h: 0 }
       } as any;
 
       setAnalysis(analysisResult);
       setSelectedCoin(coinData);
-      setCachedResult(query, { coin: coinData, analysis: analysisResult });
+      setCachedResult(targetAddress, { coin: coinData, analysis: analysisResult });
       addToHistory(coinData, analysisResult);
 
       const typeName = activeTab === 'contracts' ? 'el contrato' : 'la billetera';
       const analysisMessage = `He analizado ${typeName}. \n\n${analysisResult.reasoning}`;
 
-      const displayMessage = `He analizado ${typeName} **${query.slice(0, 6)}...${query.slice(-4)}**. \n\n${analysisResult.reasoning}`;
+      const displayMessage = `He analizado ${typeName} **${targetAddress.slice(0, 6)}...${targetAddress.slice(-4)}**. \n\n${analysisResult.reasoning}`;
 
       setChatMessages([
         { role: 'model', text: displayMessage }
@@ -497,13 +519,26 @@ function WhaleBrainApp() {
         }}
       />
 
+      <audio id="ambient-audio" src="https://actions.google.com/sounds/v1/water/ocean_waves_steady.ogg" loop />
+
       {/* Ambient Sound Toggle */}
-      <button
-        onClick={() => setSoundEnabled(!soundEnabled)}
-        className="fixed bottom-6 left-6 z-50 p-3 bg-zinc-900/80 border border-zinc-800 rounded-full text-zinc-400 hover:text-white transition-colors"
-      >
-        {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-      </button>
+      <div className="fixed bottom-6 left-6 z-50 flex flex-col items-center gap-2">
+        {!soundEnabled && (
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-emerald-500 text-white text-[10px] sm:text-xs font-black uppercase px-3 py-1.5 rounded-xl shadow-lg shadow-emerald-500/20 whitespace-nowrap hidden sm:block"
+          >
+            ¡Activá el audio! 🔊
+          </motion.div>
+        )}
+        <button
+          onClick={() => setSoundEnabled(!soundEnabled)}
+          className="p-3 bg-zinc-900/80 border border-zinc-800 rounded-full text-zinc-400 hover:text-white transition-colors relative"
+        >
+          {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+        </button>
+      </div>
 
       {/* Animated Bubbles */}
       <div className="fixed inset-0 pointer-events-none z-0 opacity-20">
@@ -737,15 +772,15 @@ function WhaleBrainApp() {
                 type="text"
                 value={query}
                 onChange={(e) => handleSearch(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && query.startsWith('0x') && analyzeAddress()}
+                onKeyDown={(e) => e.key === 'Enter' && query.length >= 30 && activeTab !== 'tokens' && analyzeAddress()}
                 placeholder={
                   activeTab === 'tokens' ? "Busca una moneda (ej. Bitcoin, Solana, Pepe...)" :
-                    activeTab === 'contracts' ? "Pega la dirección del contrato (0x...)" :
-                      "Pega la dirección de la billetera (0x...)"
+                    activeTab === 'contracts' ? "Pega la dirección del contrato (EVM o Solana)" :
+                      "Pega la dirección de la billetera (EVM o Solana)"
                 }
                 className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl py-5 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all text-lg placeholder:text-zinc-600 font-medium"
               />
-              {query.startsWith('0x') && (
+              {(query.length >= 30 && activeTab !== 'tokens') && (
                 <button
                   onClick={analyzeAddress}
                   className="absolute right-3 top-1/2 -translate-y-1/2 bg-emerald-500 hover:bg-emerald-400 text-white px-6 py-2 rounded-xl text-sm font-black uppercase italic transition-all"
