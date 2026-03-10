@@ -136,10 +136,15 @@ function WhaleBrainApp() {
   };
   const [scanHistory, setScanHistory] = useState<ScanHistoryItem[]>([]);
   const [soundEnabled, setSoundEnabled] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio();
+  }, []);
 
   // Play audio via ElevenLabs TTS
   const playWhaleAudio = async (text: string) => {
-    if (!soundEnabled) return;
+    if (!soundEnabled || !audioRef.current) return;
     try {
       // Limpiar markdown simple para el TTS
       const cleanText = text.replace(/[*_#]/g, '');
@@ -151,8 +156,10 @@ function WhaleBrainApp() {
       if (res.ok) {
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        await audio.play();
+        audioRef.current.src = url;
+        audioRef.current.play().catch(e => console.error("Audio play error:", e));
+      } else {
+        console.error("TTS API Error:", await res.text());
       }
     } catch (err) {
       console.error('Error playing TTS:', err);
@@ -338,9 +345,13 @@ function WhaleBrainApp() {
       setCachedResult(query, { coin: coinData, analysis: analysisResult });
       addToHistory(coinData, analysisResult);
 
-      const analysisMessage = `He escaneado la dirección **${query}**. \n\n${analysisResult.reasoning}`;
+      const typeName = activeTab === 'contracts' ? 'el contrato' : 'la billetera';
+      const analysisMessage = `He analizado ${typeName}. \n\n${analysisResult.reasoning}`;
+
+      const displayMessage = `He analizado ${typeName} **${query.slice(0, 6)}...${query.slice(-4)}**. \n\n${analysisResult.reasoning}`;
+
       setChatMessages([
-        { role: 'model', text: analysisMessage }
+        { role: 'model', text: displayMessage }
       ]);
       if (soundEnabled) playWhaleAudio(analysisMessage);
     } catch (err) {
@@ -382,6 +393,11 @@ function WhaleBrainApp() {
 
   const handleSendMessage = async () => {
     if (!chatInput.trim() || chatLoading) return;
+
+    // Mobile: Desbloquear el audio context de forma sincrónica
+    if (soundEnabled && audioRef.current) {
+      audioRef.current.play().catch(() => { });
+    }
 
     const userMsg: ChatMessage = { role: 'user', text: chatInput };
     const newHistory = [...chatMessages, userMsg];
@@ -988,7 +1004,7 @@ function WhaleBrainApp() {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="absolute bottom-20 right-0 w-[380px] h-[550px] bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+                className="absolute bottom-20 right-0 w-[calc(100vw-3rem)] sm:w-[380px] max-w-[380px] h-[550px] max-h-[70vh] bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
               >
                 {/* Chat Header */}
                 <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-800/50 backdrop-blur-md">
@@ -1010,7 +1026,7 @@ function WhaleBrainApp() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="px-4 py-2 flex gap-2 overflow-x-auto scrollbar-hide border-b border-zinc-800 bg-zinc-900/30">
+                <div className="px-4 py-2 flex gap-2 overflow-x-auto overflow-y-hidden scrollbar-hide max-w-full border-b border-zinc-800 bg-zinc-900/30">
                   {[
                     ...(degenMode ? [
                       { label: 'Simulador All-In', icon: Zap, prompt: 'Haz un simulador de All-In para esta moneda con 1000 USDT.' },
@@ -1023,6 +1039,7 @@ function WhaleBrainApp() {
                     <button
                       key={i}
                       onClick={() => {
+                        if (soundEnabled && audioRef.current) audioRef.current.play().catch(() => { });
                         setChatInput(action.prompt);
                       }}
                       className="flex items-center gap-2 shrink-0 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-xl border border-zinc-700 transition-colors text-[10px] font-black uppercase tracking-widest"
