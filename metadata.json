@@ -1,0 +1,5 @@
+{
+  "name": "WhaleBrain AI",
+  "description": "Crypto analysis bot that provides safety warnings and entry signals for tokens using real-time data and AI reasoning.",
+  "requestFramePermissions": []
+}
