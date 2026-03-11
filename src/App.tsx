@@ -1039,7 +1039,7 @@ function WhaleBrainApp() {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="absolute bottom-20 right-0 w-[calc(100vw-3rem)] sm:w-[380px] max-w-[380px] h-[550px] max-h-[70vh] bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+                className="fixed bottom-24 right-4 left-4 sm:left-auto sm:right-6 sm:w-[380px] h-[550px] max-h-[70vh] bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden z-[110]"
               >
                 {/* Chat Header */}
                 <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-800/50 backdrop-blur-md">
@@ -1176,45 +1176,68 @@ function WhaleBrainApp() {
       )}
 
       {/* Footer */}
-      <footer className="max-w-4xl mx-auto px-6 py-16 border-t border-zinc-900/50 text-center space-y-10">
-        <div className="space-y-4">
-          <p className="text-zinc-500 font-bold uppercase tracking-[0.2em] text-xs">
-            Desarrollado por <span className="text-zinc-300">LCA ITECH</span> <span className="mx-2 text-zinc-800">|</span> Potenciado por <span className="text-zinc-300">InvitIA Studio</span>
-          </p>
+      <footer className="max-w-4xl mx-auto px-6 py-16 mt-12 flex flex-col items-center space-y-8 z-10 relative">
+        {/* Aviso Legal Box */}
+        <div className="w-full bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 text-sm text-zinc-400 text-center leading-relaxed box-border shadow-xl">
+          <span className="text-amber-500 font-bold">⚠️ Aviso Legal:</span> Esta herramienta es <span className="font-bold text-zinc-300">exclusivamente educativa e informativa</span>. Los cálculos son hipotéticos y no representan rendimientos garantizados. No constituye asesoramiento financiero, de inversión, legal ni fiscal. Invertir en criptomonedas conlleva riesgos significativos, incluida la pérdida total del capital. Consulte a un asesor financiero profesional antes de tomar decisiones de inversión.
+        </div>
 
-          <div className="flex items-center justify-center gap-6">
-            <a href="https://x.com/LCA_ITECH" target="_blank" rel="noopener noreferrer" className="p-2 bg-zinc-900 rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition-all">
-              <Twitter className="w-5 h-5" />
-            </a>
-            <a href="https://www.instagram.com/learncryptoacademy/" target="_blank" rel="noopener noreferrer" className="p-2 bg-zinc-900 rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition-all">
-              <Instagram className="w-5 h-5" />
-            </a>
-            <a href="https://t.me/LCAITECH_OFICIAL" target="_blank" rel="noopener noreferrer" className="p-2 bg-zinc-900 rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition-all">
-              <Send className="w-5 h-5" />
-            </a>
-            <a href="https://www.instagram.com/invitia.studio/" target="_blank" rel="noopener noreferrer" className="p-2 bg-zinc-900 rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition-all">
-              <div className="w-5 h-5 flex items-center justify-center font-black text-[10px]">IN</div>
-            </a>
+        {/* Desarrollado por */}
+        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-[13px] font-black uppercase tracking-widest mt-4">
+          <span className="text-zinc-500 flex items-center gap-2">
+            Desarrollado por <span className="bg-gradient-to-r from-blue-400 via-blue-200 to-white bg-clip-text text-transparent text-sm">LCA ITECH</span>
+          </span>
+          <span className="hidden sm:block text-zinc-700">|</span>
+          <span className="text-zinc-500 flex items-center gap-2">
+            Potenciado por <span className="text-zinc-300 text-sm">InvitIA Studio</span>
+          </span>
+        </div>
+
+        {/* Social Icons */}
+        <div className="flex items-center gap-4 sm:gap-6 mt-2">
+          {/* X / Twitter */}
+          <a href="https://x.com/LCA_ITECH" target="_blank" rel="noopener noreferrer" className="p-2 sm:p-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-full text-zinc-400 hover:text-white transition-all shadow-lg">
+            <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 24.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+          </a>
+          {/* Instagram */}
+          <a href="https://www.instagram.com/learncryptoacademy/" target="_blank" rel="noopener noreferrer" className="p-2 sm:p-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-full text-zinc-400 hover:text-white transition-all shadow-lg">
+            <Instagram className="w-5 h-5 sm:w-6 sm:h-6" />
+          </a>
+          {/* Telegram */}
+          <a href="https://t.me/LCAITECH_OFICIAL" target="_blank" rel="noopener noreferrer" className="p-2 sm:p-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-full text-zinc-400 hover:text-white transition-all shadow-lg">
+            <Send className="w-5 h-5 sm:w-6 sm:h-6" />
+          </a>
+          {/* Invitia Icon */}
+          <a href="https://www.instagram.com/invitia.studio/" target="_blank" rel="noopener noreferrer" className="p-2 sm:p-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-full text-zinc-400 hover:text-white transition-all shadow-lg">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-blue-500 to-amber-500 flex items-center justify-center text-white">
+              <Brain className="w-3 h-3 sm:w-4 sm:h-4" />
+            </div>
+          </a>
+        </div>
+
+        {/* Pills */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 mt-4">
+          {/* CoinGecko Pill */}
+          <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 transition-colors rounded-3xl shadow-lg">
+            <div className="w-5 h-5 bg-[#8dc63f] rounded-full flex items-center justify-center p-0.5 shadow-inner">
+              <img src="https://static.coingecko.com/s/coingecko-logo-8903d34a19cf7469709f7830439660825021e4ad79afcb20057ca6f9790406b5.png" className="w-[120%] h-auto invert brightness-200 ml-1" alt="CG" style={{ clipPath: 'circle(40% at center)' }} />
+            </div>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Powered by <span className="text-[#8DC63F] font-black">CoinGecko API</span></span>
+          </div>
+          {/* InvitIA Pill */}
+          <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 transition-colors rounded-3xl shadow-lg">
+            <div className="w-4 h-4 rounded-sm bg-gradient-to-tr from-blue-500 to-amber-500 flex items-center justify-center text-[8px] font-black text-black">IN</div>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Potenciado por <span className="font-bold text-zinc-300">InvitIA Studio</span></span>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/50 border border-zinc-800 rounded-xl">
-            <img src="https://static.coingecko.com/s/coingecko-logo-8903d34a19cf7469709f7830439660825021e4ad79afcb20057ca6f9790406b5.png" alt="CoinGecko" className="h-4 grayscale hover:grayscale-0 transition-all" />
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">POWERED BY <span className="text-emerald-500">COINGECKO</span></span>
-          </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900/50 border border-zinc-800 rounded-xl">
-            <div className="w-4 h-4 bg-emerald-500 rounded-sm flex items-center justify-center text-[8px] font-black text-black">IN</div>
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Potenciado por <span className="text-zinc-300">InvitIA Studio</span></span>
-          </div>
-        </div>
-
-        <div className="pt-8 border-t border-zinc-900/30 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-[10px] font-bold uppercase tracking-widest text-zinc-700">
+        {/* Links Bottom */}
+        <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-[10px] font-bold uppercase tracking-widest text-zinc-700 mt-8 mb-4">
           <a href="#" className="hover:text-zinc-400 transition-colors">Política de Privacidad</a>
-          <span className="text-zinc-900">|</span>
+          <span className="text-zinc-900 hidden sm:block">|</span>
           <a href="#" className="hover:text-zinc-400 transition-colors">Términos de Uso</a>
-          <span className="text-zinc-900">|</span>
-          <a href="#" className="hover:text-zinc-400 transition-colors">Acerca de LCA ITECH</a>
+          <span className="text-zinc-900 hidden sm:block">|</span>
+          <a href="https://lcaitechs.com" target="_blank" rel="noopener noreferrer" className="hover:text-zinc-400 transition-colors">Acerca de LCA ITECH</a>
         </div>
       </footer>
     </div>
