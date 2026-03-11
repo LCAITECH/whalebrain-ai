@@ -1331,6 +1331,79 @@ function WhaleBrainApp() {
                 </div>
               </div>
 
+              {/* Smart Contract Audit Panel */}
+              {!quickMode && analysis.audit && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                  className="bg-zinc-900/60 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl relative"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+
+                  {/* Header */}
+                  <div className="bg-zinc-900/90 px-6 py-4 border-b border-zinc-800 flex flex-wrap gap-4 items-center justify-between relative z-10">
+                    <span className="text-zinc-100 font-black uppercase tracking-widest text-sm flex items-center gap-3">
+                      <ShieldAlert className="w-5 h-5 text-indigo-400" /> Audit
+                    </span>
+                    <span className={`text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-inner border ${analysis.audit.isAuditPassed ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20'}`}>
+                      {analysis.audit.isAuditPassed ? 'No issues' : 'Issues Found'}
+                      {analysis.audit.isAuditPassed ? <CheckCircle className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
+                    </span>
+                  </div>
+
+                  {/* Grid Rows */}
+                  <div className="divide-y divide-zinc-800/50 relative z-10">
+                    <div className="px-6 py-4 flex items-center justify-between hover:bg-zinc-800/30 transition-colors">
+                      <span className="text-zinc-400 text-sm font-bold uppercase tracking-wider flex items-center gap-2"><Info className="w-4 h-4" /> Peligro Honeypot</span>
+                      <span className={`text-sm font-black flex items-center gap-2 ${analysis.audit.isHoneypot ? 'text-rose-400' : 'text-emerald-400'}`}>
+                        {analysis.audit.isHoneypot ? 'ALTO' : 'Bajo'} {analysis.audit.isHoneypot ? <AlertTriangle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                      </span>
+                    </div>
+
+                    <div className="px-6 py-4 flex items-center justify-between hover:bg-zinc-800/30 transition-colors">
+                      <span className="text-zinc-400 text-sm font-bold uppercase tracking-wider flex items-center gap-2"><Info className="w-4 h-4" /> Mintable</span>
+                      <span className={`text-sm font-black flex items-center gap-2 ${analysis.audit.isMintable ? 'text-rose-400' : 'text-emerald-400'}`}>
+                        {analysis.audit.isMintable ? 'Yes' : 'No'} {analysis.audit.isMintable ? <AlertTriangle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                      </span>
+                    </div>
+
+                    <div className="px-6 py-4 flex items-center justify-between hover:bg-zinc-800/30 transition-colors">
+                      <span className="text-zinc-400 text-sm font-bold uppercase tracking-wider flex items-center gap-2"><Info className="w-4 h-4" /> Freezable</span>
+                      <span className={`text-sm font-black flex items-center gap-2 ${analysis.audit.isFreezable ? 'text-rose-400' : 'text-emerald-400'}`}>
+                        {analysis.audit.isFreezable ? 'Yes' : 'No'} {analysis.audit.isFreezable ? <AlertTriangle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                      </span>
+                    </div>
+
+                    <div className="px-6 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:bg-zinc-800/30 transition-colors bg-black/20">
+                      <div className="flex gap-8">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Buy Tax</span>
+                          <span className={`text-lg font-mono font-black ${parseInt(analysis.audit.buyTax) > 5 ? 'text-rose-400' : 'text-emerald-400'}`}>{analysis.audit.buyTax}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Sell Tax</span>
+                          <span className={`text-lg font-mono font-black ${parseInt(analysis.audit.sellTax) > 5 ? 'text-rose-400' : 'text-emerald-400'}`}>{analysis.audit.sellTax}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-8 md:text-right">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">LP Locked</span>
+                          <span className={`text-sm font-black ${!analysis.audit.lpLocked ? 'text-rose-400' : 'text-emerald-400'}`}>{analysis.audit.lpLocked ? 'Yes (>6m)' : 'No / Low'}</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Renounced</span>
+                          <span className={`text-sm font-black ${!analysis.audit.renounced ? 'text-rose-400' : 'text-emerald-400'}`}>{analysis.audit.renounced ? 'Yes' : 'No'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                  <div className="bg-black/40 px-6 py-3 border-t border-zinc-800 flex items-center justify-center gap-2 text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                    <Brain className="w-3 h-3" /> Warning! Audits may not be 100% accurate. AI Generated.
+                  </div>
+                </motion.div>
+              )}
+
               {/* Detailed Analysis - Hidden in Quick Mode */}
               {!quickMode && (
                 <div className="grid md:grid-cols-2 gap-8">
