@@ -1103,22 +1103,29 @@ function WhaleBrainApp() {
                 <div className="px-4 py-3 flex flex-wrap gap-2 max-w-full border-b border-zinc-800 bg-zinc-900/30">
                   {[
                     ...(degenMode ? [
+                      {
+                        label: '🚨 ESCÁNER ANTI-ROBO',
+                        icon: ShieldAlert,
+                        prompt: 'Acabo de adjuntarte una captura de pantalla de un contrato, página web, o transacción de wallet que estoy a punto de firmar. Analízalo a fondo como experto en ciberseguridad Web3. Busca si es un SCAM evidente, un honeypot, o si el contrato tiene permisos abusivos ocultos para drenarme la wallet. Dime la posta directo, agresivo y sin filtro antes de que firme con mi plata.',
+                        colorClass: 'bg-orange-500/20 text-orange-400 border-orange-500/50 hover:bg-orange-500/30'
+                      },
                       { label: 'Simulador All-In', icon: Zap, prompt: 'Haz un simulador de All-In para esta moneda con 1000 USDT.' },
                       { label: 'Pump & Dump?', icon: AlertTriangle, prompt: '¿Esto huele a Pump & Dump coordinado?' },
                     ] : []),
+                    { label: '🪂 MODO RATA (Airdrops)', icon: Coins, prompt: 'Soy un Degen sin un peso y quiero farmear airdrops. Dame las 3 mejores testnets incentivadas actuales o protocolos sin token donde pueda calificar gratis o gastando muy poco gas. Rata Mode ON.', colorClass: 'bg-yellow-500/20 text-yellow-500 border-yellow-500/50 hover:bg-yellow-500/30 font-black' },
                     { label: 'Simular Posición', icon: Activity, prompt: 'Si entro con 500 USDT en esta moneda, ¿cuánto puedo perder en el peor caso?' },
                     { label: 'Explicar L2', icon: Info, prompt: 'Explícame qué es un Layer 2 como si tuviera 5 años' },
                     { label: 'Comparar', icon: TrendingUp, prompt: 'Compara esta moneda con su principal competidor' },
-                  ].map((action, i) => (
+                  ].map((action: any, i) => (
                     <button
                       key={i}
                       onClick={() => {
                         if (soundEnabled && audioRef.current) audioRef.current.pause();
                         setChatInput(action.prompt);
                       }}
-                      className="flex items-center gap-2 shrink-0 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-xl border border-zinc-700 transition-colors text-[10px] font-black uppercase tracking-widest"
+                      className={`flex items-center gap-2 shrink-0 px-3 py-1.5 rounded-xl border transition-colors text-[10px] font-black uppercase tracking-widest ${action.colorClass || 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-300'}`}
                     >
-                      <action.icon className="w-3 h-3 text-emerald-400" />
+                      <action.icon className={`w-3 h-3 ${action.colorClass ? 'text-inherit' : 'text-emerald-400'}`} />
                       {action.label}
                     </button>
                   ))}
