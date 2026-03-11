@@ -8,6 +8,8 @@
 
 body {
   @apply bg-[#030712] text-zinc-100;
+  background-color: var(--tg-theme-bg-color, #030712);
+  color: var(--tg-theme-text-color, #f4f4f5);
 }
 
 @layer utilities {
