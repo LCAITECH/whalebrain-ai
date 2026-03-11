@@ -438,7 +438,7 @@ function WhaleBrainApp() {
     setChatLoading(true);
 
     try {
-      const response = await chatWithWhale(newHistory, selectedCoin || undefined, degenMode, quickMode);
+      const response = await chatWithWhale(newHistory, selectedCoin || undefined, degenMode, quickMode, activeTab);
       setChatMessages([...newHistory, { role: 'model', text: response }]);
       if (soundEnabled) playWhaleAudio(response);
     } catch (err) {
