@@ -425,9 +425,9 @@ function WhaleBrainApp() {
   const handleSendMessage = async () => {
     if ((!chatInput.trim() && !chatImage) || chatLoading) return;
 
-    // Mobile: Desbloquear el audio context de forma sincrónica
+    // Mobile: Frenar el audio anterior si seguía sonando
     if (soundEnabled && audioRef.current) {
-      audioRef.current.play().catch(() => { });
+      audioRef.current.pause();
     }
 
     const userMsg: ChatMessage = { role: 'user', text: chatInput, image: chatImage || undefined };
@@ -1118,7 +1118,7 @@ function WhaleBrainApp() {
                     <button
                       key={i}
                       onClick={() => {
-                        if (soundEnabled && audioRef.current) audioRef.current.play().catch(() => { });
+                        if (soundEnabled && audioRef.current) audioRef.current.pause();
                         setChatInput(action.prompt);
                       }}
                       className="flex items-center gap-2 shrink-0 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-xl border border-zinc-700 transition-colors text-[10px] font-black uppercase tracking-widest"
