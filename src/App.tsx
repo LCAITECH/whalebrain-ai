@@ -262,10 +262,6 @@ function WhaleBrainApp() {
       return;
     }
 
-    if (val.startsWith('0x') && val.length > 30) {
-      return;
-    }
-
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
 
     searchTimeout.current = setTimeout(async () => {
@@ -286,11 +282,6 @@ function WhaleBrainApp() {
     // Mobile iOS: Desbloquear stream de audio sincrónicamente con el tap del usuario
     if (soundEnabled && audioRef.current) audioRef.current.play().catch(() => { });
 
-    if (coinId.length >= 30) {
-      setQuery(coinId);
-      analyzeAddress(coinId);
-      return;
-    }
     const cached = getCachedResult(coinId);
     if (cached) {
       setSelectedCoin(cached.coin);
@@ -433,7 +424,8 @@ function WhaleBrainApp() {
       audioRef.current.pause();
     }
 
-    const userMsg: ChatMessage = { role: 'user', text: chatInput, image: chatImage || undefined };
+    const finalInput = chatInput.trim() || (chatImage ? "Che ballena, fíjate lo que te adjunto en esta imagen y tirame tu análisis Degen." : "");
+    const userMsg: ChatMessage = { role: 'user', text: finalInput, image: chatImage || undefined };
     const newHistory = [...chatMessages, userMsg];
     setChatMessages(newHistory);
     setChatInput('');
