@@ -407,39 +407,6 @@ function WhaleBrainApp() {
   const shareAnalysis = async () => {
     if (!selectedCoin || !analysis) return;
 
-    const element = document.getElementById('share-card');
-    if (element) {
-      triggerToast('Generando carta viral... 📸');
-      try {
-        const html2canvas = (await import('html2canvas')).default;
-
-        // Add a temporary class to ensure it's fully visible and styled for the screenshot
-        element.classList.add('bg-zinc-950', 'p-6', 'rounded-3xl');
-
-        const canvas = await html2canvas(element, {
-          backgroundColor: '#09090b',
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          logging: false
-        });
-
-        element.classList.remove('bg-zinc-950', 'p-6', 'rounded-3xl');
-
-        const image = canvas.toDataURL("image/png");
-        const link = document.createElement('a');
-        link.download = `WhaleBrain_${selectedCoin.symbol.toUpperCase()}_Analysis.png`;
-        link.href = image;
-        link.click();
-
-        triggerToast('¡Carta Viral descargada! 🐋📸');
-        return; // Skip default sharing if image downloaded successfully
-      } catch (err) {
-        console.error("Error generating share image:", err);
-        triggerToast('Error generado la imagen. Copiando texto...');
-      }
-    }
-
     const shareText = `🐋 WhaleBrain AI Analysis: ${selectedCoin.name}\n📈 Score: ${analysis.score}/100\n💡 Recommendation: ${analysis.recommendation}\n💬 "${analysis.catchphrase}"\n\nAnaliza tus gemas en WhaleBrain AI!`;
 
     if (navigator.share) {
