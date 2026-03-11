@@ -118,9 +118,15 @@ function WhaleBrainApp() {
 
   const [degenMode, setDegenMode] = useState(false);
   const [quickMode, setQuickMode] = useState(false);
-  const [activeTab, setActiveTab] = useState<'tokens' | 'contracts' | 'wallets' | 'compare' | 'portfolio'>('tokens');
+  const [rataMode, setRataMode] = useState(false);
+  const [activeTab, setActiveTab] = useState<'tokens' | 'contracts' | 'wallets' | 'compare' | 'portfolio' | 'academy' | 'airdrops'>('tokens');
   const [compareAddresses, setCompareAddresses] = useState({ addr1: '', addr2: '' });
   const [compareResults, setCompareResults] = useState<{ res1: AnalysisResult | null, res2: AnalysisResult | null }>({ res1: null, res2: null });
+
+  // Si se activa Modo Rata, forzamos a la pestaña de airdrops
+  useEffect(() => {
+    if (rataMode) setActiveTab('airdrops');
+  }, [rataMode]);
 
   const handleCompare = async () => {
     if (!compareAddresses.addr1 || !compareAddresses.addr2) return;
@@ -267,7 +273,7 @@ function WhaleBrainApp() {
     searchTimeout.current = setTimeout(async () => {
       setSearching(true);
       try {
-        const res = await fetch(`/api/search?query=${val}`);
+        const res = await fetch(`/api/search?query=${val}&degen=${degenMode}`);
         const data = await res.json();
         setSearchResults(data.coins || []);
       } catch (err) {
@@ -295,7 +301,7 @@ function WhaleBrainApp() {
     setSearchResults([]);
     setQuery('');
     try {
-      const res = await fetch(`/api/coin?id=${coinId}`);
+      const res = await fetch(`/api/coin?id=${coinId}&degen=${degenMode}`);
       const data: CoinData = await res.json();
 
       if (!res.ok || (data as any)['error'] || !data.name) {
@@ -578,8 +584,20 @@ function WhaleBrainApp() {
         ))}
       </div>
 
-      {/* Degen Mode & Quick Mode Toggles */}
+      {/* Degen Mode, Quick Mode & Rata Mode Toggles */}
       <div className="fixed top-6 right-6 z-50 flex flex-col gap-3 items-end">
+
+        <button
+          onClick={() => setRataMode(!rataMode)}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${rataMode
+            ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.5)]'
+            : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+            }`}
+        >
+          <Coins className={`w-4 h-4 ${rataMode ? 'animate-bounce' : ''}`} />
+          <span className="text-xs font-black uppercase tracking-widest">Modo Rata {rataMode ? 'ON' : 'OFF'}</span>
+        </button>
+
         <button
           onClick={() => setDegenMode(!degenMode)}
           className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${degenMode
@@ -604,9 +622,10 @@ function WhaleBrainApp() {
       </div>
 
       {/* Background Glow */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <div className={`fixed inset-0 overflow-hidden pointer-events-none transition-colors duration-1000 ${rataMode ? 'bg-yellow-500/5' : ''}`}>
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full" />
+        {rataMode && <div className="absolute top-[20%] right-[10%] w-[50%] h-[50%] bg-yellow-500/10 blur-[150px] rounded-full" />}
       </div>
 
       <div className="relative max-w-4xl mx-auto px-6 py-12">
@@ -683,6 +702,7 @@ function WhaleBrainApp() {
             { id: 'contracts', label: 'Contratos', icon: Activity },
             { id: 'wallets', label: 'Billeteras', icon: User },
             { id: 'academy', label: 'Academia', icon: Brain },
+            { id: 'airdrops', label: 'Airdrops', icon: Coins },
             { id: 'compare', label: 'Comparar', icon: ArrowLeftRight },
             { id: 'portfolio', label: 'Portfolio', icon: Briefcase },
           ].map((tab) => (
@@ -734,6 +754,41 @@ function WhaleBrainApp() {
                   <h3 className="text-lg font-black uppercase text-white mb-2">LSTs (Liquid Staking Tokens)</h3>
                   <p className="text-sm text-zinc-400 leading-relaxed mb-4">Ejemplos: <strong>stETH (Lido), JitoSOL</strong>. Simulan que tus monedas originales están bloqueadas generando interés (Staking), pero de forma líquida para que puedas usarlas en DeFi al mismo tiempo. Es básicamente dinero apalancado constructivamente.</p>
                   <div className="text-[10px] font-black uppercase text-blue-400 bg-blue-500/10 px-3 py-1.5 rounded-lg inline-block">Riesgo: Medio (Hackeos al protocolo)</div>
+                </div>
+              </div>
+            </div>
+          ) : activeTab === 'airdrops' ? (
+            <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 md:p-8 space-y-8 relative overflow-hidden">
+              {rataMode && <div className="absolute inset-0 bg-yellow-500/5 z-0 pointer-events-none" />}
+              <div className="text-center mb-8 relative z-10">
+                <h2 className="text-3xl font-black uppercase tracking-tight text-yellow-400 mb-2 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]">🪂 Cuartel General Rata</h2>
+                <p className="text-zinc-400">Guía suprema para farmear dinero del aire (Airdrops) y aplicar estrategias Degen sin morir intentándolo.</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                {/* Airdrops Locales */}
+                <div className="bg-gradient-to-br from-yellow-500/10 to-zinc-900/50 p-6 rounded-2xl border border-yellow-500/30">
+                  <div className="w-12 h-12 bg-yellow-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <Coins className="w-6 h-6 text-yellow-400" />
+                  </div>
+                  <h3 className="text-lg font-black uppercase text-yellow-500 mb-2">¿Qué es un Airdrop?</h3>
+                  <p className="text-sm text-zinc-400 leading-relaxed mb-4">Protocolos que recién nacen necesitan probar sus redes (Testnets) o ganar liquidez. A cambio de interactuar repetidamente con ellos, usar puentes o depositar monedas, te recompensan enviándote tokens gratis semanas o meses después. Es dinero "fácil" pero requiere constancia.</p>
+                  <ul className="text-xs text-zinc-500 space-y-2 mt-2 list-disc pl-4 font-medium">
+                    <li>Usá siempre una "Burner Wallet" (Billetera quemable) secundaria.</li>
+                    <li>Ojo con firmar contratos maliciosos buscando airdrops falsos en Twitter.</li>
+                  </ul>
+                </div>
+
+                {/* Estrategias Degen */}
+                <div className="bg-gradient-to-br from-purple-500/10 to-zinc-900/50 p-6 rounded-2xl border border-purple-500/30">
+                  <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <Activity className="w-6 h-6 text-purple-400" />
+                  </div>
+                  <h3 className="text-lg font-black uppercase text-purple-500 mb-2">Estrategias Degen (Nivel Dios)</h3>
+                  <p className="text-sm text-zinc-400 leading-relaxed mb-4"><strong>El Looping:</strong> Pones 1 ETH de garantía en un protocolo de préstamos (AAVE, MarginFi), pedís prestado USDC contra tu propio ETH, compras más ETH con ese USDC, y lo volvés a depositar como garantía para pedir más plata. Estás apalancado ganando doble o triple rentabilidad (y doble riesgo de liquidación si el mercado cae).</p>
+                  <ul className="text-xs text-zinc-500 space-y-2 mt-2 list-disc pl-4 font-medium">
+                    <li>Nunca pases el 60% de LTV (Relación Préstamo-Valor).</li>
+                    <li>Aprovechá plataformas nuevas que pagan por usar sus préstamos.</li>
+                  </ul>
                 </div>
               </div>
             </div>
