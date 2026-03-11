@@ -25,17 +25,26 @@ export async function GET(req: Request) {
                     seenAddresses.add(address);
                     uniqueTokens.push({
                         id: address,
-                        name: pair.baseToken.name,
+                        name: `${pair.baseToken.name} (${pair.chainId?.toUpperCase() || 'DEX'})`,
                         api_symbol: pair.baseToken.symbol,
                         symbol: pair.baseToken.symbol,
-                        market_cap_rank: pair.fdv || pair.liquidity.usd || 0,
+                        sort_value: pair.fdv || pair.liquidity.usd || 0,
                         thumb: pair.info?.imageUrl || "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
                         large: pair.info?.imageUrl || "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
                     });
                 }
             }
-            uniqueTokens.sort((a, b) => b.market_cap_rank - a.market_cap_rank);
-            return new Response(JSON.stringify({ coins: uniqueTokens.slice(0, 15) }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+            uniqueTokens.sort((a, b) => b.sort_value - a.sort_value);
+            const formattedTokens = uniqueTokens.slice(0, 15).map((t, i) => ({
+                id: t.id,
+                name: t.name,
+                api_symbol: t.api_symbol,
+                symbol: t.symbol,
+                market_cap_rank: i + 1,
+                thumb: t.thumb,
+                large: t.large
+            }));
+            return new Response(JSON.stringify({ coins: formattedTokens }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
         } else {
             // MODO NORMAL (SAFE): CoinGecko Native Search (Precios top-100 reales, soluciona bug de INJ)
