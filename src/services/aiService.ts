@@ -47,13 +47,16 @@ export async function analyzeCoin(coinData: CoinData, degenMode: boolean = false
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         isJson: true,
-        model: "gpt-5-mini",
+        model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
         systemInstruction: "Eres WhaleBrain AI, el analista on-chain de criptomonedas más picante de Telegram. Responde ÚNICAMENTE con el formato JSON crudo sin comillas invertidas ni markdown."
       })
     });
 
-    if (!res.ok) throw new Error("Fallo en proxy de IA");
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errorText}`);
+    }
     const data = await res.json();
     return JSON.parse(data.text || "{}") as AnalysisResult;
   } catch (e) {
@@ -132,7 +135,7 @@ export async function chatWithWhale(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         isJson: false,
-        model: "gpt-5-mini",
+        model: "gpt-4o-mini",
         messages: formattedMessages,
         systemInstruction
       })
@@ -156,7 +159,7 @@ export async function summarizeForAudio(text: string): Promise<string> {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         isJson: false,
-        model: "gpt-5-mini",
+        model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }]
       })
     });
