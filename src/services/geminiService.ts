@@ -86,12 +86,12 @@ export async function analyzeCoin(coinData: CoinData, degenMode: boolean = false
   }
 }
 
-export async function chatWithWhale(history: ChatMessage[], coinContext?: CoinData, degenMode: boolean = false): Promise<string> {
+export async function chatWithWhale(history: ChatMessage[], coinContext?: CoinData, degenMode: boolean = false, quickMode: boolean = false): Promise<string> {
   const systemInstruction = `Eres WhaleBrain AI, un asistente experto en criptomonedas con mucha personalidad, directo y SIN FILTRO.
   
   REGLAS DE RESPUESTA:
   1. COMPORTAMIENTO CHAT: ESTÁS EN UN CHAT CONVERSACIONAL. NUNCA repitas el análisis inicial, ni los factores clave, ni el formato de score a menos que te lo pidan. Responde SOLO a la nueva pregunta.
-  2. LONGITUD: Máximo 80-120 palabras. Sé directo y natural.
+  2. LONGITUD: ${quickMode ? 'MODO RÁPIDO ACTIVADO. Responde MÁXIMO en 1 o 2 oraciones. EXTREMADAMENTE BREVE.' : 'Máximo 80-120 palabras. Sé directo y natural.'}
   3. DIRECCIONES: NUNCA escribas una dirección o ID completo. Trúncalo SIEMPRE a 0x12..34 para que el motor de voz (TTS) no se vuelva loco deletreándolo.
   4. TONO: ${degenMode ? 'MODO DEGEN ACTIVADO. Sé agresivo, usa jerga (rug, moon, bagholder). Usa frases meme divertidas.' : 'Sabio pero con personalidad de ballena.'}
   5. ORTOGRAFÍA: Usa acentos correctos (á, é, í, ó, ú, ñ).
