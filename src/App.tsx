@@ -668,6 +668,44 @@ function WhaleBrainApp() {
         )}
       </AnimatePresence>
 
+      {/* Rata Mode Frame Glow & Falling Rats Effect */}
+      <AnimatePresence>
+        {rataMode && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9998] pointer-events-none border-[8px] md:border-[16px] border-yellow-500/30 shadow-[inset_0_0_150px_rgba(234,179,8,0.4)] transition-colors duration-1000"
+          >
+            <div className="absolute inset-0 border-[2px] border-yellow-500/50 animate-pulse" />
+            <div className="absolute inset-0 bg-yellow-500/[0.03]" />
+
+            <div className="absolute inset-0 overflow-hidden">
+              {[...Array(15)].map((_, i) => (
+                <motion.div
+                  key={`rata-${i}`}
+                  initial={{ y: '-10vh', x: `${Math.random() * 100}vw`, rotate: 0 }}
+                  animate={{
+                    y: '110vh',
+                    x: `${(Math.random() * 100)}vw`,
+                    rotate: 360
+                  }}
+                  transition={{
+                    duration: Math.random() * 5 + 3,
+                    repeat: Infinity,
+                    ease: "linear",
+                    delay: Math.random() * 5
+                  }}
+                  className="absolute text-2xl opacity-20 filter drop-shadow-[0_0_10px_rgba(234,179,8,0.8)]"
+                >
+                  🐀
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Ocean Background Layer */}
       <div
         className="fixed inset-0 z-[-1] bg-[#020617]"
