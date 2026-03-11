@@ -29,8 +29,8 @@ export async function analyzeCoin(coinData: CoinData, degenMode: boolean = false
     
     INSTRUCCIONES GENERALES:
     - Si es una MEMECOIN, sé directo sobre el riesgo de casino.
-    - Si es un CONTRATO, busca honeypots y liquidez.
-    - Si es una BILLETERA, identifica si es SNIPER.
+    - Si es un CONTRATO, busca honeypots y liquidez. NUNCA escribas el contrato completo en tu respuesta, abrevíalo SIEMPRE a formato corto (ej: 0x12...3456) para que el lector de voz (TTS) no lo deletree y arruine el audio.
+    - Si es una BILLETERA, identifica si es SNIPER. Abrevia SIEMPRE la dirección.
     
     Proporciona una recomendación: SAFE, WAIT, o CAUTION.
     Score de 0 a 100.
@@ -90,12 +90,11 @@ export async function chatWithWhale(history: ChatMessage[], coinContext?: CoinDa
   const systemInstruction = `Eres WhaleBrain AI, un asistente experto en criptomonedas con mucha personalidad, directo y SIN FILTRO.
   
   REGLAS DE RESPUESTA:
-  1. LONGITUD: Máximo 180-220 palabras. Sé directo.
-  2. FORMATO: Usa párrafos cortos, EMOJIS y listas de MÁXIMO 3 PUNTOS.
-  3. TONO: ${degenMode ? 'MODO DEGEN ACTIVADO. Sé agresivo, usa jerga (rug, moon, bagholder, calzoncillos). Si algo es basura, dilo: "Esto es una mierda". Usa frases meme como "Más arriesgado que mensaje a tu ex".' : 'Sabio pero con personalidad de ballena.'}
-  4. ESTRUCTURA: Ve al grano rápido: riesgo máximo, recomendación clara y 1-3 consejos útiles.
-  5. FINAL: Termina SIEMPRE con una frase picante o una pregunta para seguir el chat.
-  6. ORTOGRAFÍA: Usa acentos correctos (á, é, í, ó, ú, ñ). NO reemplaces acentos por símbolos como "!" o similares.
+  1. COMPORTAMIENTO CHAT: ESTÁS EN UN CHAT CONVERSACIONAL. NUNCA repitas el análisis inicial, ni los factores clave, ni el formato de score a menos que te lo pidan. Responde SOLO a la nueva pregunta.
+  2. LONGITUD: Máximo 80-120 palabras. Sé directo y natural.
+  3. DIRECCIONES: NUNCA escribas una dirección o ID completo. Trúncalo SIEMPRE a 0x12..34 para que el motor de voz (TTS) no se vuelva loco deletreándolo.
+  4. TONO: ${degenMode ? 'MODO DEGEN ACTIVADO. Sé agresivo, usa jerga (rug, moon, bagholder). Usa frases meme divertidas.' : 'Sabio pero con personalidad de ballena.'}
+  5. ORTOGRAFÍA: Usa acentos correctos (á, é, í, ó, ú, ñ).
   
   ${coinContext ? `Contexto actual: Estás analizando ${coinContext.name} (${coinContext.symbol}).` : ''}
   
@@ -111,10 +110,20 @@ export async function chatWithWhale(history: ChatMessage[], coinContext?: CoinDa
     });
 
     // Convert history to Gemini format
-    const contents = history.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.text }]
-    }));
+    const contents = history.map(msg => {
+      const parts: any[] = [{ text: msg.text }];
+      if (msg.image) {
+        const [meta, data] = msg.image.split(',');
+        const mimeType = meta.split(':')[1].split(';')[0];
+        parts.push({
+          inlineData: { data, mimeType }
+        });
+      }
+      return {
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts
+      };
+    });
 
     // We send the last message
     const lastMessage = contents.pop();
