@@ -124,6 +124,7 @@ function WhaleBrainApp() {
   const [compareAddresses, setCompareAddresses] = useState({ addr1: '', addr2: '' });
   const [compareResults, setCompareResults] = useState<{ res1: AnalysisResult | null, res2: AnalysisResult | null }>({ res1: null, res2: null });
   const [tgUser, setTgUser] = useState<any>(null);
+  const [credits, setCredits] = useState<number | null>(null);
 
   // Telegram Mini App Initialization
   useEffect(() => {
@@ -133,6 +134,18 @@ function WhaleBrainApp() {
       tg.expand();
       if (tg.initDataUnsafe?.user) {
         setTgUser(tg.initDataUnsafe.user);
+
+        // Registrar en Supabase y obtener créditos silenciosamente
+        fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tgUser: tg.initDataUnsafe.user })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.credits !== undefined) setCredits(data.credits);
+          })
+          .catch(err => console.error("Fallo registrando en base de datos:", err));
       }
     }
   }, []);
@@ -215,6 +228,11 @@ function WhaleBrainApp() {
     audioRef.current.play().catch(() => { });
 
     try {
+      if (credits !== null && credits <= 0) {
+        triggerToast("¡ENERGÍA AGOTADA! GASTASTE TUS CRÉDITOS DIARIOS. VOLVÉ MAÑANA GORDO.");
+        return;
+      }
+
       setAudioLoading(true);
       // Limpiar markdown y silenciar direcciones hexadecimales para no quemar tokens de TTS
       const cleanText = text
@@ -227,9 +245,11 @@ function WhaleBrainApp() {
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: compressedScript })
+        body: JSON.stringify({ text: compressedScript, tg_id: tgUser?.id })
       });
+
       if (res.ok) {
+        setCredits(prev => prev !== null ? prev - 1 : prev);
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         audioRef.current.src = url;
@@ -717,6 +737,13 @@ function WhaleBrainApp() {
 
       {/* Global Action Toggles */}
       <div className="fixed top-6 right-6 z-50 flex flex-col gap-3 items-end">
+
+        {credits !== null && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full border bg-zinc-900/80 border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)] backdrop-blur-md">
+            <span className="text-sm font-black italic">{credits}</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">⚡ ENERGÍA</span>
+          </div>
+        )}
 
         <button
           onClick={() => {
