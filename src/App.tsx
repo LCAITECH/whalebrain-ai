@@ -3,7 +3,7 @@ import {
   Search, AlertTriangle, CheckCircle, Clock, TrendingUp, TrendingDown,
   Activity, Brain, Info, Loader2, MessageSquare, Send, X, User,
   Copy, Share2, History, Zap, Volume2, VolumeX, ArrowLeftRight,
-  Briefcase, ShieldAlert, Settings, Coins, Wallet, Instagram, Twitter
+  Briefcase, ShieldAlert, Settings, Coins, Wallet, Instagram, Twitter, Flame, Trophy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
@@ -704,30 +704,82 @@ function WhaleBrainApp() {
             </div>
           </motion.div>
           <h1 className={`text-4xl md:text-6xl font-black tracking-tight mb-2 bg-gradient-to-r from-white via-emerald-400 to-blue-500 bg-clip-text text-transparent uppercase italic transition-all duration-500 ${degenMode ? 'drop-shadow-[0_0_15px_rgba(16,185,129,0.8)] scale-105' : ''}`}>
-            WhaleBrain AI
+            TRADE LIKE A WHALE
           </h1>
-          <p className="text-zinc-500 text-lg max-w-md font-medium">
-            Inteligencia de ballena para tus inversiones. Pregúntame y no dejes que te desplumen.
+          <p className="text-emerald-400 text-xl font-black uppercase tracking-widest mb-2 shadow-emerald-500/50 drop-shadow-md">
+            Stop being the exit liquidity.
+          </p>
+          <p className="text-zinc-500 text-sm max-w-md font-medium uppercase tracking-wider">
+            La IA que trackea el Smart Money antes del pump. Operá con ventaja injusta o seguí perdiendo plata.
           </p>
         </header>
 
-        {/* Daily Alerts */}
-        <div className="mb-12 bg-emerald-500/5 border border-emerald-500/20 rounded-3xl p-4 flex items-center gap-4 overflow-x-auto scrollbar-hide">
-          <div className="flex items-center gap-2 shrink-0 px-4 py-2 bg-emerald-500/20 rounded-2xl border border-emerald-500/30">
-            <AlertTriangle className="w-4 h-4 text-emerald-400" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Alertas Hoy</span>
+        {/* Proof of Alpha Banner */}
+        <div className="mb-8 w-full max-w-3xl mx-auto overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500/20 via-zinc-900 to-emerald-500/20 border justify-center border-emerald-500/30 py-3 px-4 shadow-[0_0_20px_rgba(16,185,129,0.15)] flex items-center gap-3">
+          <span className="relative flex h-3 w-3 shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
+          <div className="text-[12px] font-black uppercase tracking-widest text-emerald-400 flex-1 flex items-center overflow-hidden whitespace-nowrap">
+            <motion.div
+              animate={{ x: ["100%", "-100%"] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="flex gap-12"
+            >
+              <span>✅ PROOF OF ALPHA: Nuestra IA detectó $PEPE2.0 4hs antes del pump (+3500%)</span>
+              <span>🔥 SMART MONEY: 0x8aF... acaba de acumular $4M en $PNUT antes del listado en Binance (+1200%)</span>
+              <span>⚠️ ALERTA RUGPULL: Detectamos honeypot oculto en $SHIBAI salvando $500k de la comunidad</span>
+            </motion.div>
           </div>
-          {[
-            { name: 'SOL', price: '$142.5', change: '+5.2%', score: 88 },
-            { name: 'PEPE', price: '$0.00001', change: '-12%', score: 12 },
-            { name: 'ETH', price: '$2,450', change: '+1.8%', score: 92 },
-          ].map((alert, i) => (
-            <div key={i} className="flex items-center gap-3 shrink-0 px-4 py-2 bg-zinc-900/40 rounded-2xl border border-zinc-800">
-              <span className="font-black italic text-xs">{alert.name}</span>
-              <span className={`text-[10px] font-mono ${alert.score > 50 ? 'text-emerald-400' : 'text-rose-400'}`}>Score: {alert.score}</span>
-            </div>
-          ))}
         </div>
+
+        {/* Smart Money Live Feed (Urgency Trigger) */}
+        {!selectedCoin && activeTab === 'tokens' && (
+          <div className="mb-12 bg-zinc-900/60 border border-zinc-800 rounded-3xl p-4 flex flex-col gap-3 max-w-3xl mx-auto shadow-2xl">
+            <div className="flex items-center justify-between px-2 pb-2 border-b border-zinc-800/50">
+              <div className="flex items-center gap-2">
+                <Flame className="w-5 h-5 text-orange-500 animate-pulse" />
+                <span className="text-xs font-black uppercase tracking-widest text-orange-400">Live: Smart Money Tracker</span>
+              </div>
+              <span className="text-[10px] text-zinc-500 uppercase font-black tracking-widest flex items-center gap-1">
+                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping" />
+                Radar Activo
+              </span>
+            </div>
+            <div className="space-y-2 mt-2">
+              {[
+                { token: 'TRUMP', action: 'ACUMULANDO', amount: '$150K', time: 'hace 2 min', wallet: '0x94f...2a1', isSell: false },
+                { token: 'AIX', action: 'COMPRA ROTACIÓN', amount: '$54K', time: 'hace 5 min', wallet: '0x12a...9b4', isSell: false },
+                { token: 'PEPE', action: 'DUMPEANDO ALL-IN', amount: '$1.2M', time: 'hace 12 min', wallet: '0x88c...11f', isSell: true },
+              ].map((alert, i) => (
+                <div key={i} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-black/40 rounded-2xl border border-zinc-800/50 hover:border-zinc-700 transition-all hover:scale-[1.01] cursor-pointer group" onClick={() => handleSearch(alert.token)}>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shadow-inner ${alert.isSell ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'}`}>
+                      ${alert.token.substring(0, 3)}
+                    </div>
+                    <div>
+                      <div className="text-sm font-black text-white group-hover:text-emerald-400 transition-colors">${alert.token}</div>
+                      <div className="text-[10px] font-mono text-zinc-500 flex items-center gap-1">
+                        <User className="w-3 h-3" /> {alert.wallet}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-end">
+                      <span className={`text-[11px] font-black tracking-widest uppercase px-2 py-1 rounded-md mb-1 ${alert.isSell ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                        {alert.action}
+                      </span>
+                      <span className="text-sm border-b border-dashed border-zinc-700 font-mono font-black text-white">{alert.amount}</span>
+                    </div>
+                    <div className="text-[10px] text-zinc-600 font-medium whitespace-nowrap flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {alert.time}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex justify-center gap-2 mb-8 flex-wrap">
@@ -823,6 +875,52 @@ function WhaleBrainApp() {
                     <li>Nunca pases el 60% de LTV (Relación Préstamo-Valor).</li>
                     <li>Aprovechá plataformas nuevas que pagan por usar sus préstamos.</li>
                   </ul>
+                </div>
+                {/* Airdrop Checker (Gamified) */}
+                <div className="md:col-span-2 bg-gradient-to-br from-zinc-900 to-black p-8 rounded-3xl border border-yellow-500/30 shadow-[0_0_30px_rgba(234,179,8,0.05)] relative overflow-hidden">
+                  <div className="absolute -right-10 -top-10 w-40 h-40 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                  <div className="text-center mb-6">
+                    <Trophy className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+                    <h3 className="text-2xl font-black uppercase tracking-widest text-white mb-2">Check Airdrop Eligibility <span className="text-yellow-500 text">with AI</span></h3>
+                    <p className="text-zinc-500 font-medium max-w-lg mx-auto">Ingresá tu wallet para que WhaleBrain escanee tu actividad on-chain, analice los protocolos que estás usando, y te diga qué airdrops inminentes te estás perdiendo por no farmear como las ballenas.</p>
+                  </div>
+
+                  <div className="max-w-xl mx-auto">
+                    <div className="relative flex items-center">
+                      <input
+                        type="text"
+                        placeholder="Pegá tu Wallet (0x...) para escanear elegibilidad..."
+                        className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl py-5 px-6 pr-32 focus:outline-none focus:border-yellow-500/50 focus:ring-2 focus:ring-yellow-500/20 transition-all font-mono text-sm placeholder:text-zinc-600"
+                      />
+                      <button
+                        onClick={() => {
+                          setShowToast(true);
+                          setToastMessage("🚀 INTERCEPTO ON-CHAIN INICIADO... ESCANEANDO BILLETERA...");
+                          setTimeout(() => setShowToast(false), 3000);
+                          // Fake delay logic or just opening chat
+                          setTimeout(() => {
+                            setShowChat(true);
+                            setChatInput("Acabo de ingresar mi wallet en el Airdrop Checker. Analiza mi actividad reciente y dime qué airdrops top de 2026/2027 me estoy perdiendo y qué 3 tareas baratas puedo hacer HOY para calificar.");
+                          }, 1000);
+                        }}
+                        className="absolute right-2 top-2 bottom-2 bg-yellow-500 hover:bg-yellow-400 text-black px-6 rounded-xl font-black uppercase text-xs tracking-widest transition-colors shadow-lg shadow-yellow-500/20"
+                      >
+                        Scanear
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-center gap-6 mt-6">
+                      <div className="flex flex-col items-center">
+                        <span className="text-2xl font-black text-white">42+</span>
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Protocolos Trackeados</span>
+                      </div>
+                      <div className="w-px h-8 bg-zinc-800" />
+                      <div className="flex flex-col items-center">
+                        <span className="text-2xl outline-title font-black text-transparent" style={{ WebkitTextStroke: '1px #eab308' }}>$2.5M+</span>
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Farmeados por usuarios</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
