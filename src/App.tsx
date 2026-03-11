@@ -559,7 +559,7 @@ function WhaleBrainApp() {
         }}
       />
 
-      <audio id="ambient-audio" src="https://actions.google.com/sounds/v1/water/ocean_waves_steady.ogg" loop />
+      <audio id="ambient-audio" src="/ocean-waves.mp3" loop />
 
       {/* Ambient Sound Toggle */}
       <div className="fixed bottom-6 left-6 z-50 flex flex-col items-center gap-2">
