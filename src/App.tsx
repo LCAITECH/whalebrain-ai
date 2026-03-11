@@ -3,10 +3,11 @@ import {
   Search, AlertTriangle, CheckCircle, Clock, TrendingUp, TrendingDown,
   Activity, Brain, Info, Loader2, MessageSquare, Send, X, User,
   Copy, Share2, History, Zap, Volume2, VolumeX, ArrowLeftRight,
-  Briefcase, ShieldAlert, Settings, Coins, Wallet, Instagram, Twitter, Flame, Trophy
+  Briefcase, ShieldAlert, Settings, Coins, Wallet, Instagram, Twitter, Flame, Trophy, ClipboardPaste
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
+import { TonConnectButton } from '@tonconnect/ui-react';
 import { CoinData, SearchResult, AnalysisResult, ChatMessage } from './types';
 import { analyzeCoin, chatWithWhale, summarizeForAudio } from './services/geminiService';
 
@@ -256,7 +257,7 @@ function WhaleBrainApp() {
       });
 
       if (res.ok) {
-        setCredits(prev => prev !== null ? prev - 1 : prev);
+        setCredits(prev => prev !== null ? prev - 1 : prev); // Restamos crédito igual para gamificación
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         audioRef.current.src = url;
@@ -687,26 +688,32 @@ function WhaleBrainApp() {
             <div className="absolute inset-0 border-[4px] border-yellow-400/60 animate-pulse mix-blend-overlay" />
             <div className="absolute inset-0 bg-yellow-500/[0.03]" />
 
+            <style>{`
+              @keyframes fall-rata {
+                0% { transform: translateY(-10vh) rotate(0deg); }
+                100% { transform: translateY(110vh) rotate(360deg); }
+              }
+              .rata-pixel {
+                position: absolute;
+                font-size: 1.5rem;
+                opacity: 0.2;
+                animation: fall-rata linear infinite;
+                will-change: transform;
+              }
+            `}</style>
             <div className="absolute inset-0 overflow-hidden">
               {[...Array(15)].map((_, i) => (
-                <motion.div
+                <div
                   key={`rata-${i}`}
-                  initial={{ y: '-10vh', x: `${Math.random() * 100}vw`, rotate: 0 }}
-                  animate={{
-                    y: '110vh',
-                    x: `${(Math.random() * 100)}vw`,
-                    rotate: 360
+                  className="rata-pixel"
+                  style={{
+                    left: `${Math.random() * 100}vw`,
+                    animationDuration: `${Math.random() * 5 + 3}s`,
+                    animationDelay: `${Math.random() * 5}s`
                   }}
-                  transition={{
-                    duration: Math.random() * 5 + 3,
-                    repeat: Infinity,
-                    ease: "linear",
-                    delay: Math.random() * 5
-                  }}
-                  className="absolute text-2xl opacity-20 filter drop-shadow-[0_0_10px_rgba(234,179,8,0.8)]"
                 >
                   🐀
-                </motion.div>
+                </div>
               ))}
             </div>
           </motion.div>
@@ -783,6 +790,7 @@ function WhaleBrainApp() {
 
       {/* Global Action Toggles */}
       <div className="fixed top-6 right-6 z-50 flex flex-col gap-3 items-end">
+        <TonConnectButton className="mb-2 shadow-[0_0_15px_rgba(0,152,234,0.3)] transition-all hover:scale-105" />
 
         {credits !== null && (
           <div className="flex items-center gap-2 px-4 py-2 rounded-full border bg-zinc-900/80 border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)] backdrop-blur-md">
@@ -1333,8 +1341,30 @@ function WhaleBrainApp() {
                     activeTab === 'contracts' ? "Pega la dirección del contrato (EVM o Solana)" :
                       "Pega la dirección de la billetera (EVM o Solana)"
                 }
-                className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl py-5 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all text-lg placeholder:text-zinc-600 font-medium"
+                className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl py-5 pl-12 pr-14 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all text-lg placeholder:text-zinc-600 font-medium"
               />
+
+              {/* Quick Paste Button for Mobile */}
+              {(!query && navigator.clipboard) && (
+                <button
+                  onClick={async () => {
+                    try {
+                      const text = await navigator.clipboard.readText();
+                      if (text) {
+                        setQuery(text);
+                        if (text.length >= 30) handleSearch(text);
+                      }
+                    } catch (err) {
+                      triggerToast("ACTIVA PERMISOS DE PORTAPAPELES. El navegador lo bloqueó.");
+                    }
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-emerald-400 transition-colors p-2 rounded-xl bg-zinc-800/50 border border-zinc-700 hover:bg-emerald-500/10 hover:border-emerald-500/30 active:scale-95"
+                  title="Pegar rápido"
+                >
+                  <ClipboardPaste className="w-4 h-4" />
+                </button>
+              )}
+
               {(query.length >= 30 && activeTab !== 'tokens') && (
                 <button
                   onClick={analyzeAddress}
@@ -1343,6 +1373,28 @@ function WhaleBrainApp() {
                   Escanear
                 </button>
               )}
+            </div>
+          )}
+
+          {/* Quick Trending Coins / Airdrop Pills row */}
+          {activeTab === 'tokens' && !query && (
+            <div className="mt-4 px-2 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none w-full">
+              <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest whitespace-nowrap hidden sm:block">HOT 🔥</span>
+              {[
+                { token: 'PENGU', bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' },
+                { token: 'TRUMP', bg: 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20' },
+                { token: 'CHIPPY', bg: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/20' },
+                { token: 'GOAT', bg: 'bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500/20' },
+                { token: 'MOODENG', bg: 'bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20' }
+              ].map((item) => (
+                <button
+                  key={item.token}
+                  onClick={() => { setQuery(item.token); handleSearch(item.token); }}
+                  className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border transition-all active:scale-95 ${item.bg}`}
+                >
+                  ${item.token}
+                </button>
+              ))}
             </div>
           )}
 
