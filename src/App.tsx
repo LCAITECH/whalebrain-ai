@@ -1030,7 +1030,7 @@ function WhaleBrainApp() {
               )}
 
               {/* TradingView Widget - Solo para Tokens */}
-              {!quickMode && activeTab === 'search' && selectedCoin.symbol && (
+              {!quickMode && activeTab === 'tokens' && selectedCoin.symbol && (
                 <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-4 overflow-hidden h-[500px]">
                   <iframe
                     src={`https://s.tradingview.com/widgetembed/?symbol=CRYPTO:${selectedCoin.symbol.toUpperCase()}USD&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D&overrides=%7B%7D&wordwrap=1&no_referral_id=1`}
