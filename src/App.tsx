@@ -208,7 +208,7 @@ function WhaleBrainApp() {
 
   // Play audio via ElevenLabs TTS
   const playWhaleAudio = async (text: string) => {
-    if (!soundEnabled || !audioRef.current) return;
+    if (!audioRef.current) return;
     try {
       // Limpiar markdown y silenciar direcciones hexadecimales para no quemar tokens de TTS
       const cleanText = text
