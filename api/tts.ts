@@ -1,19 +1,17 @@
-export async function POST(req: Request) {
-    const { text } = await req.json().catch(() => ({ text: null }));
+export default async function handler(req: any, res: any) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    const text = req.body?.text;
     const apiKey = process.env.ELEVENLABS_API_KEY;
     const voiceId = process.env.ELEVENLABS_VOICE_ID;
 
     if (!apiKey || !voiceId) {
-        return new Response(JSON.stringify({ error: "ElevenLabs credentials missing" }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' },
-        });
+        return res.status(400).json({ error: "ElevenLabs credentials missing" });
     }
     if (!text) {
-        return new Response(JSON.stringify({ error: "Text is required" }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' },
-        });
+        return res.status(400).json({ error: "Text is required" });
     }
 
     try {
@@ -26,7 +24,7 @@ export async function POST(req: Request) {
             },
             body: JSON.stringify({
                 text,
-                model_id: "eleven_multilingual_v2",
+                model_id: "eleven_turbo_v2_5", // Using ultra-fast v2.5 for snappier responses
                 voice_settings: {
                     stability: 0.5,
                     similarity_boost: 0.75
@@ -39,15 +37,11 @@ export async function POST(req: Request) {
         }
 
         const arrayBuffer = await response.arrayBuffer();
-        return new Response(arrayBuffer, {
-            status: 200,
-            headers: { 'Content-Type': 'audio/mpeg' },
-        });
+        res.setHeader('Content-Type', 'audio/mpeg');
+        res.status(200).send(Buffer.from(arrayBuffer));
+
     } catch (error) {
         console.error("Error generating TTS:", error);
-        return new Response(JSON.stringify({ error: "Internal server error" }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
+        return res.status(500).json({ error: "Internal server error" });
     }
 }
