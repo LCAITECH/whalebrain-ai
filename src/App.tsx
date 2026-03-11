@@ -682,6 +682,7 @@ function WhaleBrainApp() {
             { id: 'tokens', label: 'Tokens', icon: TrendingUp },
             { id: 'contracts', label: 'Contratos', icon: Activity },
             { id: 'wallets', label: 'Billeteras', icon: User },
+            { id: 'academy', label: 'Academia', icon: Brain },
             { id: 'compare', label: 'Comparar', icon: ArrowLeftRight },
             { id: 'portfolio', label: 'Portfolio', icon: Briefcase },
           ].map((tab) => (
@@ -701,7 +702,42 @@ function WhaleBrainApp() {
 
         {/* Search Section */}
         <div className="relative mb-12">
-          {activeTab === 'compare' ? (
+          {activeTab === 'academy' ? (
+            <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 md:p-8 space-y-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-black uppercase tracking-tight text-white mb-2">📚 Academia Degen</h2>
+                <p className="text-zinc-400">Todo lo que necesitas saber para que no te arruinen en el mercado libre.</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="bg-zinc-800/50 p-6 rounded-2xl border border-zinc-700/50 hover:border-emerald-500/50 transition-colors">
+                  <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <History className="w-6 h-6 text-emerald-400" />
+                  </div>
+                  <h3 className="text-lg font-black uppercase text-white mb-2">Stablecoins Fiat (Liquidez Real)</h3>
+                  <p className="text-sm text-zinc-400 leading-relaxed mb-4">Ejemplos: <strong>USDT, USDC</strong>. Son activos colateralizados 1:1 con dólares reales guardados en bancos. Son la base "segura" del mercado crypto, usadas como refugio cuando todo cae.</p>
+                  <div className="text-[10px] font-black uppercase text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg inline-block">Riesgo: Bajo</div>
+                </div>
+
+                <div className="bg-zinc-800/50 p-6 rounded-2xl border border-zinc-700/50 hover:border-rose-500/50 transition-colors">
+                  <div className="w-12 h-12 bg-rose-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <AlertTriangle className="w-6 h-6 text-rose-400" />
+                  </div>
+                  <h3 className="text-lg font-black uppercase text-white mb-2">Stablecoins Algorítmicas</h3>
+                  <p className="text-sm text-zinc-400 leading-relaxed mb-4">Ejemplos: <strong>UST (RIP), TUSD, FRAX</strong>. No tienen dólares reales que las respalden. Usan fórmulas matemáticas o colateralización de otras cryptos. Si el algoritmo falla o hay pánico masivo, ocurre un <em>"De-Peg"</em> y se van a CERO.</p>
+                  <div className="text-[10px] font-black uppercase text-rose-400 bg-rose-500/10 px-3 py-1.5 rounded-lg inline-block">Riesgo: Extremo</div>
+                </div>
+
+                <div className="bg-zinc-800/50 p-6 rounded-2xl border border-zinc-700/50 hover:border-blue-500/50 transition-colors">
+                  <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <Zap className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <h3 className="text-lg font-black uppercase text-white mb-2">LSTs (Liquid Staking Tokens)</h3>
+                  <p className="text-sm text-zinc-400 leading-relaxed mb-4">Ejemplos: <strong>stETH (Lido), JitoSOL</strong>. Simulan que tus monedas originales están bloqueadas generando interés (Staking), pero de forma líquida para que puedas usarlas en DeFi al mismo tiempo. Es básicamente dinero apalancado constructivamente.</p>
+                  <div className="text-[10px] font-black uppercase text-blue-400 bg-blue-500/10 px-3 py-1.5 rounded-lg inline-block">Riesgo: Medio (Hackeos al protocolo)</div>
+                </div>
+              </div>
+            </div>
+          ) : activeTab === 'compare' ? (
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="relative">
