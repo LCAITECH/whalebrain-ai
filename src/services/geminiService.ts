@@ -117,17 +117,9 @@ export async function chatWithWhale(
   Si el usuario pregunta por "Simulador de All-In" y estás en Degen, haz un cálculo ficticio sarcástico.`;
 
   try {
-    const chat = ai.chats.create({
-      model: "gemini-2.0-flash",
-      config: {
-        systemInstruction,
-      },
-    });
-
-    // Convert history to Gemini format
     const contents = history.map(msg => {
       const parts: any[] = [{ text: msg.text }];
-      if (msg.image) {
+      if (msg.image && msg.role === 'user') {
         const [meta, data] = msg.image.split(',');
         const mimeType = meta.split(':')[1].split(';')[0];
         parts.push({
@@ -140,11 +132,17 @@ export async function chatWithWhale(
       };
     });
 
-    // We send the last message
-    const lastMessage = contents.pop();
+    // Gemini API exige que el historial comience siempre con el rol 'user'
+    if (contents.length > 0 && contents[0].role !== 'user') {
+      contents.unshift({ role: 'user', parts: [{ text: "Iniciemos el análisis." }] });
+    }
 
-    const response = await chat.sendMessage({
-      message: lastMessage?.parts[0].text || "Hola",
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: contents,
+      config: {
+        systemInstruction,
+      },
     });
 
     return response.text || "No sé qué decirte, el mar está muy profundo hoy.";
