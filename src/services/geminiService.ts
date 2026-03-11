@@ -30,7 +30,10 @@ export async function analyzeCoin(coinData: CoinData, degenMode: boolean = false
     INSTRUCCIONES GENERALES:
     - Si es una MEMECOIN, sé directo sobre el riesgo de casino.
     - Si es un CONTRATO, busca honeypots y liquidez. NUNCA escribas el contrato completo en tu respuesta, abrevíalo SIEMPRE a formato corto (ej: 0x12...3456) para que el lector de voz (TTS) no lo deletree y arruine el audio.
-    - Si es una BILLETERA, identifica si es SNIPER. Abrevia SIEMPRE la dirección.
+    - Si es una BILLETERA, asume el rol de AUDITOR FORENSE WEB3 IMPLACABLE. 
+      * El 'SCORE' JSON (0-100) debe reflejar qué tan VULNERABLE es a ser drenada (100 = bóveda segura nivel cold-wallet, 0 = a punto de perder todo por firmar webs scamosas).
+      * En el 'reasoning' o 'keyFactors', incluye SIEMPRE un MINICHECKLIST táctico para asegurar sus fondos.
+      * OBLIGATORIO: Aconséjale tajantemente usar herramientas como Revoke.cash o Rabby Wallet para REVOCAR CONTRATOS abusivos firmados en el pasado que podrían estar dormidos esperando para robarle. Abrevia SIEMPRE la dirección.
     
     Proporciona una recomendación: SAFE, WAIT, o CAUTION.
     Score de 0 a 100.
@@ -94,11 +97,11 @@ export async function chatWithWhale(
   contextType: string = 'tokens'
 ): Promise<string> {
 
-  let typeRule = 'Este es un TOKEN/MONEDA. Si el usuario pide más análisis, ofrécele sugerir mirar los "Holders", la "Liquidez" o las "Comisiones de red" que requieren revisar a fondo su contrato.';
+  let typeRule = 'Este es un TOKEN/MONEDA. IDENTIFICA Y CLASIFICA EL TOKEN DE INMEDIATO: 1) Si es una Stablecoin Fiat (como USDT/USDC), evalúa su transparencia. 2) Si es una Stablecoin Algorítmica (como TUSD/UST), grita el RIESGO EXTREMO DE DE-PEG. 3) Si es un Token Líquido/LST (como stETH/JitoSOL), evalúa el riesgo del protocolo padre. 4) Si es un token normal, analízalo normalmente. Si el usuario pide más análisis, ofrécele sugerir mirar los "Holders", la "Liquidez" o las "Comisiones de red".';
   if (contextType === 'contracts') {
     typeRule = 'Este es un CONTRATO INTELIGENTE. Enfócate en detalles técnicos o sugiere investigar: funciones ocultas, honeypots, código de proxy, o dueños del contrato.';
   } else if (contextType === 'wallets') {
-    typeRule = 'Esta es una BILLETERA (Wallet). Tu objetivo sugerido es clasificar su perfil de actividad: ¿Es una Gran Ballena (Whale), un francotirador (Sniper), un usuario ordinario, o un Scammer/Fantasma? Basate en su historial o sugierelo.';
+    typeRule = 'Esta es una BILLETERA PÚBLICA. A partir de ahora eres un Perro Guardián de Ciberseguridad Forense. Tu objetivo principal no es solo su trading, sino detectar VULNERABILIDADES. Ordénale que revoque contratos basura antiguos (menciona Revoke.cash) y preséntale un Score de Seguridad de billetera rápido y un checklist de acciones urgentes de protección.';
   }
 
   const systemInstruction = `Eres WhaleBrain AI, un asistente experto en criptomonedas con mucha personalidad, directo y SIN FILTRO.
