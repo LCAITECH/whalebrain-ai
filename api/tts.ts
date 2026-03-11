@@ -11,13 +11,12 @@ export default async function handler(req: Request) {
         const tg_id = body.tg_id; // Identidad delegada desde el App
 
         // Environment variables in Edge Runtime on Vercel
-        const apiKey = process.env.ELEVENLABS_API_KEY;
-        const voiceId = process.env.ELEVENLABS_VOICE_ID;
+        const apiKey = process.env.OPENAI_API_KEY;
         const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
         const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
 
-        if (!apiKey || !voiceId) {
-            return new Response(JSON.stringify({ error: "Missing ElevenLabs credentials" }), { status: 400 });
+        if (!apiKey) {
+            return new Response(JSON.stringify({ error: "Missing OpenAI API Key" }), { status: 400 });
         }
         if (!text) {
             return new Response(JSON.stringify({ error: "Text is required" }), { status: 400 });
@@ -53,25 +52,25 @@ export default async function handler(req: Request) {
         }
         // ----------------------------------------------------
 
-        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`, {
+        // Llamada a la API de OpenAI TTS (Mucho más barato, rápido y con voces crudas)
+        const response = await fetch('https://api.openai.com/v1/audio/speech', {
             method: 'POST',
             headers: {
-                'Accept': 'audio/mpeg',
-                'xi-api-key': apiKey,
+                'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                text,
-                model_id: "eleven_turbo_v2_5", // Ultra-fast model
-                voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+                model: "tts-1",
+                voice: "onyx", // ideal para degen/arquitectura ruda
+                input: text
             })
         });
 
         if (!response.ok) {
-            return new Response(JSON.stringify({ error: `ElevenLabs API Error: ${response.statusText}` }), { status: response.status });
+            return new Response(JSON.stringify({ error: `OpenAI API Error: ${response.statusText}` }), { status: response.status });
         }
 
-        // Return the raw byte stream directly to the client without buffering it in memory
+        // Devolver el ArrayBuffer como stream literal para reproducción HTML <audio>
         return new Response(response.body, {
             status: 200,
             headers: {
