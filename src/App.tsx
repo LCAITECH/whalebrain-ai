@@ -156,27 +156,25 @@ function WhaleBrainApp() {
     }
   }, [soundEnabled]);
 
-  // Play audio via Native Browser TTS (Unlimited & Free)
+  // Play audio via ElevenLabs TTS
   const playWhaleAudio = async (text: string) => {
-    if (!soundEnabled) return;
+    if (!soundEnabled || !audioRef.current) return;
     try {
       // Limpiar markdown simple para el TTS
       const cleanText = text.replace(/[*_#]/g, '');
-
-      // Frenar cualquier voz anterior
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.lang = 'es-AR';
-      utterance.rate = 1.05; // Un poco más ágil
-      utterance.pitch = 0.7; // Voz más grave (estilo ballena)
-
-      // Buscar voz en español
-      const voices = window.speechSynthesis.getVoices();
-      const esVoice = voices.find(v => v.lang.includes('es-AR') || v.lang.includes('es-MX') || v.lang.includes('es-ES') || v.lang.includes('es'));
-      if (esVoice) utterance.voice = esVoice;
-
-      window.speechSynthesis.speak(utterance);
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: cleanText })
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        audioRef.current.src = url;
+        audioRef.current.play().catch(e => console.error("Audio play error:", e));
+      } else {
+        console.error("TTS API Error:", await res.text());
+      }
     } catch (err) {
       console.error('Error playing TTS:', err);
     }
