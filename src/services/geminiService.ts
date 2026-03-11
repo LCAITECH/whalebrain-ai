@@ -38,6 +38,15 @@ export async function analyzeCoin(coinData: CoinData, degenMode: boolean = false
     Proporciona una recomendación: SAFE, WAIT, o CAUTION.
     Score de 0 a 100.
     Genera una "catchphrase" con mucha personalidad (estilo WhaleBrain AI Degen).
+    
+    INSTRUCCIÓN ESPECIAL PARA CONTRATOS (AUDIT METRICS):
+    Debes generar el objeto "audit". Utiliza tus conocimientos predictivos o de base de datos para simular un análisis real del token. Reglas estrictas:
+    - Score menor a 70 puntos es RIESGO DE HONEYPOT inminente (isHoneypot: true).
+    - Si el SELL/BUY TAX es mayor a 5%, inclúyelo literal en string (ej: "10%") y baja el score.
+    - Si LP LOCKED es menor a 6 meses, asigna 'false' (Peligro).
+    - Si RENOUNCED es 'false', es Peligroso (Posible scam).
+    - TOP 10 HOLDERS si pasaron el 50% de la moneda, es Peligroso.
+    - Creator Clean: asegúrate de analizar si el creador o la liquidez tienen un historial turbio previo.
   `;
 
   try {
@@ -70,8 +79,25 @@ export async function analyzeCoin(coinData: CoinData, degenMode: boolean = false
               type: Type.STRING,
               description: "Frase picante y meme en español",
             },
+            audit: {
+              type: Type.OBJECT,
+              description: "Métricas duras del Contrato Inteligente o Token",
+              properties: {
+                isHoneypot: { type: Type.BOOLEAN },
+                isAuditPassed: { type: Type.BOOLEAN },
+                isFreezable: { type: Type.BOOLEAN },
+                isMintable: { type: Type.BOOLEAN },
+                buyTax: { type: Type.STRING, description: "Ej: 0%, 5%, 15%" },
+                sellTax: { type: Type.STRING, description: "Ej: 0%, 5%, 15%" },
+                lpLocked: { type: Type.BOOLEAN, description: "True si está bloqueado más de 6 meses" },
+                renounced: { type: Type.BOOLEAN, description: "True si el creador renunció al contrato" },
+                top10HoldersPercent: { type: Type.STRING, description: "Ej: 15%, 80%" },
+                creatorClean: { type: Type.BOOLEAN, description: "False si el wallet tiene rugpulls previos" },
+              },
+              required: ["isHoneypot", "isAuditPassed", "isFreezable", "isMintable", "buyTax", "sellTax", "lpLocked", "renounced", "top10HoldersPercent", "creatorClean"]
+            }
           },
-          required: ["recommendation", "score", "reasoning", "keyFactors", "catchphrase"],
+          required: ["recommendation", "score", "reasoning", "keyFactors", "catchphrase", "audit"],
         },
       },
     });
