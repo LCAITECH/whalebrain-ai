@@ -1,20 +1,25 @@
-export default async function handler(req: any, res: any) {
+export const config = { runtime: 'edge' };
+
+export default async function handler(req: Request) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
-
-    const text = req.body?.text;
-    const apiKey = process.env.ELEVENLABS_API_KEY;
-    const voiceId = process.env.ELEVENLABS_VOICE_ID;
-
-    if (!apiKey || !voiceId) {
-        return res.status(400).json({ error: "ElevenLabs credentials missing" });
-    }
-    if (!text) {
-        return res.status(400).json({ error: "Text is required" });
+        return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
     }
 
     try {
+        const body = await req.json();
+        const text = body.text;
+
+        // Environment variables in Edge Runtime on Vercel
+        const apiKey = process.env.ELEVENLABS_API_KEY;
+        const voiceId = process.env.ELEVENLABS_VOICE_ID;
+
+        if (!apiKey || !voiceId) {
+            return new Response(JSON.stringify({ error: "Missing ElevenLabs credentials" }), { status: 400 });
+        }
+        if (!text) {
+            return new Response(JSON.stringify({ error: "Text is required" }), { status: 400 });
+        }
+
         const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`, {
             method: 'POST',
             headers: {
@@ -24,24 +29,23 @@ export default async function handler(req: any, res: any) {
             },
             body: JSON.stringify({
                 text,
-                model_id: "eleven_turbo_v2_5", // Using ultra-fast v2.5 for snappier responses
-                voice_settings: {
-                    stability: 0.5,
-                    similarity_boost: 0.75
-                }
+                model_id: "eleven_turbo_v2_5", // Ultra-fast model
+                voice_settings: { stability: 0.5, similarity_boost: 0.75 }
             })
         });
 
         if (!response.ok) {
-            throw new Error(`ElevenLabs API Error: ${response.status} ${response.statusText}`);
+            return new Response(JSON.stringify({ error: `ElevenLabs API Error: ${response.statusText}` }), { status: response.status });
         }
 
-        const arrayBuffer = await response.arrayBuffer();
-        res.setHeader('Content-Type', 'audio/mpeg');
-        res.status(200).send(Buffer.from(arrayBuffer));
-
-    } catch (error) {
-        console.error("Error generating TTS:", error);
-        return res.status(500).json({ error: "Internal server error" });
+        // Return the raw byte stream directly to the client without buffering it in memory
+        return new Response(response.body, {
+            status: 200,
+            headers: {
+                'Content-Type': 'audio/mpeg',
+            }
+        });
+    } catch (e) {
+        return new Response(JSON.stringify({ error: `Internal Server Error: ${e instanceof Error ? e.message : String(e)}` }), { status: 500 });
     }
 }
