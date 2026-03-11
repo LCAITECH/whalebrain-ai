@@ -233,12 +233,18 @@ function WhaleBrainApp() {
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         audioRef.current.src = url;
-        audioRef.current.play().catch(e => console.error("Audio play error:", e));
+        audioRef.current.play().catch(e => {
+          console.error("Audio play error:", e);
+          triggerToast(`SISTEMA AUDIO BLOQUEADO: ${e.message}`);
+        });
       } else {
-        console.error("TTS API Error:", await res.text());
+        const errText = await res.text();
+        console.error("TTS API Error:", errText);
+        triggerToast(`API RECHAZADA: ${errText.slice(0, 60)}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error playing TTS:', err);
+      triggerToast(`Fallo de Red TTS: ${err.message}`);
     } finally {
       setAudioLoading(false);
     }
@@ -446,6 +452,7 @@ function WhaleBrainApp() {
 
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [showShareCard, setShowShareCard] = useState(false);
 
   const triggerToast = (message: string) => {
     setToastMessage(message);
@@ -461,17 +468,8 @@ function WhaleBrainApp() {
   const shareAnalysis = async () => {
     if (!selectedCoin || !analysis) return;
 
-    const shareText = `🐋 WhaleBrain AI Analysis: ${selectedCoin.name}\n📈 Score: ${analysis.score}/100\n💡 Recommendation: ${analysis.recommendation}\n💬 "${analysis.catchphrase}"\n\nAnaliza tus gemas en WhaleBrain AI!`;
-
-    if (navigator.share) {
-      navigator.share({
-        title: `Análisis de ${selectedCoin.name}`,
-        text: shareText,
-        url: window.location.href,
-      }).catch(console.error);
-    } else {
-      copyToClipboard(shareText);
-    }
+    // Mostramos la Card Visual cinematográfica para que el usuario haga captura de pantalla
+    setShowShareCard(true);
   };
 
   const handleSendMessage = async () => {
@@ -531,6 +529,87 @@ function WhaleBrainApp() {
 
   return (
     <div className="min-h-screen text-zinc-100 font-sans selection:bg-emerald-500/30 relative">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[10000] bg-zinc-900 border-2 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)] text-emerald-400 font-black uppercase tracking-widest px-6 py-3 rounded-2xl flex items-center gap-3 whitespace-nowrap"
+          >
+            <AlertTriangle className="w-5 h-5 text-emerald-400" />
+            {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Share Card Alpha Receipt (Visual Overlay UI para Capturas de Pantalla) */}
+      <AnimatePresence>
+        {showShareCard && selectedCoin && analysis && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[10000] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4"
+          >
+            <div className="w-full max-w-sm relative">
+              <button
+                onClick={() => setShowShareCard(false)}
+                className="absolute -top-12 right-0 p-2 text-zinc-400 hover:text-white bg-zinc-900 rounded-full"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              <div id="share-card-content" className="bg-[#0f172a] border border-cyan-500/30 rounded-[2rem] p-6 shadow-[0_0_50px_rgba(6,182,212,0.15)] relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-purple-500/10" />
+
+                <div className="flex items-center gap-3 mb-6 relative z-10">
+                  <Brain className="w-8 h-8 text-cyan-400" />
+                  <div>
+                    <h3 className="text-cyan-400 font-black tracking-widest text-xs uppercase">WhaleBrain AI</h3>
+                    <p className="text-zinc-500 text-[10px] uppercase font-mono">Alpha Receipt v1.0</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 mb-6 relative z-10">
+                  <img src={selectedCoin.image.large} alt={selectedCoin.name} className="w-16 h-16 rounded-2xl shadow-lg border border-zinc-700/50" />
+                  <div>
+                    <h2 className="text-2xl font-black italic uppercase leading-none">{selectedCoin.name}</h2>
+                    <span className="text-zinc-500 font-mono text-sm tracking-widest">{selectedCoin.symbol}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
+                  <div className="bg-black/40 rounded-2xl p-4 border border-zinc-800">
+                    <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Score Global</p>
+                    <p className={`text-4xl font-mono font-black ${analysis.score < 30 ? 'text-rose-500' : 'text-emerald-400'}`}>
+                      {analysis.score}<span className="text-sm text-zinc-600">/100</span>
+                    </p>
+                  </div>
+                  <div className="bg-black/40 rounded-2xl p-4 border border-zinc-800 flex flex-col justify-center">
+                    <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Veredicto</p>
+                    <p className={`text-sm font-black uppercase ${analysis.score < 30 ? 'text-rose-400' : (analysis.score < 70 ? 'text-amber-400' : 'text-emerald-400')}`}>
+                      {getRecommendationLabel(analysis.recommendation)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-2xl p-4 relative z-10">
+                  <p className="text-cyan-400 font-black italic text-sm leading-relaxed text-center">
+                    "{analysis.catchphrase}"
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 text-center text-zinc-500 text-xs font-black tracking-widest uppercase animate-pulse">
+                📸 Saca captura de pantalla para compartir
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Degen Mode Frame Glow & Shark Effect */}
       <AnimatePresence>
         {degenMode && (
