@@ -363,8 +363,6 @@ function WhaleBrainApp() {
       setChatMessages([
         { role: 'model', text: initialMessage }
       ]);
-
-      if (soundEnabled) playWhaleAudio(initialMessage);
     } catch (err) {
       console.error(err);
       setChatMessages([{ role: 'model', text: "Esta moneda está más desaparecida que mi ex, rey. No encontré nada. 😂" }]);
@@ -427,7 +425,6 @@ function WhaleBrainApp() {
       setChatMessages([
         { role: 'model', text: displayMessage }
       ]);
-      if (soundEnabled) playWhaleAudio(analysisMessage);
     } catch (err) {
       console.error(err);
       setChatMessages([{ role: 'model', text: "Esta dirección está más vacía que mi billetera después de un rugpull, rey. 😂" }]);
@@ -1531,6 +1528,18 @@ function WhaleBrainApp() {
                     </button>
                   ))}
                 </div>
+
+                {/* Manual Audio Trigger */}
+                {chatMessages.length > 0 && chatMessages[chatMessages.length - 1].role === 'model' && (
+                  <div className="px-4 py-3 border-b border-zinc-800 bg-zinc-900/40 flex justify-center">
+                    <button
+                      onClick={() => playWhaleAudio(chatMessages[chatMessages.length - 1].text)}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.2)]"
+                    >
+                      <Volume2 className="w-4 h-4" /> Escuchar Veredicto (Gasta Energía)
+                    </button>
+                  </div>
+                )}
 
                 {/* Messages Area */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar bg-zinc-900/80">
