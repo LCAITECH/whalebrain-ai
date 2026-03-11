@@ -1108,10 +1108,12 @@ function WhaleBrainApp() {
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {[
-                          { name: 'Monad', desc: 'Interactuá con Testnet v8. Farmeo rápido sin riesgo.', tag: 'L1', link: 'https://testnet.monad.xyz', color: 'bg-indigo-500' },
-                          { name: 'Linea', desc: 'Completá la campaña LXP en Layer3.', tag: 'L2', link: 'https://linea.build', color: 'bg-blue-500' },
-                          { name: 'Berachain', desc: 'Hacé swaps diarios en la bArtio Testnet.', tag: 'DeFi', link: 'https://berachain.com', color: 'bg-amber-600' },
-                          { name: 'Scroll', desc: 'Proveé liquidez para ganar Marks (Puntos).', tag: 'ZkEVM', link: 'https://scroll.io', color: 'bg-yellow-500' }
+                          { name: 'Solana (SOL)', desc: 'Ecosistema 🔥. Usá Jito o Kamino para farmear puntos.', tag: 'L1', link: 'https://jito.network', color: 'bg-purple-500' },
+                          { name: 'BNB Chain', desc: 'Binance Megadrops y farmeos líquidos de bajo costo.', tag: 'L1', link: 'https://megadrop.binance.com', color: 'bg-yellow-500' },
+                          { name: 'Ethereum (ETH)', desc: 'Restaking (EigenLayer, ether.fi). Mucha liquidez, alto gas.', tag: 'L1', link: 'https://ether.fi', color: 'bg-blue-600' },
+                          { name: 'Monad', desc: 'Testnet activa. Farmeo rápido sin riesgo en la L1 paralela.', tag: 'L1 Hot', link: 'https://testnet.monad.xyz', color: 'bg-indigo-500' },
+                          { name: 'Linea', desc: 'Campaña LXP en marcha. Interactuá con dApps.', tag: 'L2 Hot', link: 'https://linea.build', color: 'bg-cyan-500' },
+                          { name: 'AAVE (Incentivos)', desc: 'Mercado Lending pagando recompensas extra (Merit) en red Base.', tag: 'Lending', link: 'https://app.aave.com', color: 'bg-violet-500' }
                         ].map((drop, idx) => (
                           <a key={idx} href={drop.link} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all group">
                             <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${drop.color} shadow-[0_0_10px_currentColor]`} />
