@@ -45,4 +45,5 @@ export interface AnalysisResult {
 export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
+  image?: string;
 }
