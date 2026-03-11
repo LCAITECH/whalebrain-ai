@@ -79,8 +79,8 @@ export async function analyzeCoin(coinData: CoinData, degenMode: boolean = false
     return {
       recommendation: 'CAUTION',
       score: 50,
-      reasoning: "No se pudo procesar el análisis. El mercado está muy volátil, fiera.",
-      keyFactors: ["Error de análisis"],
+      reasoning: `No se pudo procesar el análisis en la V4. Error real: ${e instanceof Error ? e.message : String(e)}`,
+      keyFactors: ["Error de análisis", "Falla técnica reportada"],
       catchphrase: "¡Rayos! Mi cerebro de ballena se congeló un segundo."
     };
   }
@@ -118,7 +118,7 @@ export async function chatWithWhale(history: ChatMessage[], coinContext?: CoinDa
 
     // We send the last message
     const lastMessage = contents.pop();
-    
+
     const response = await chat.sendMessage({
       message: lastMessage?.parts[0].text || "Hola",
     });
