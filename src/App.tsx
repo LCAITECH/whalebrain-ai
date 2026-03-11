@@ -110,6 +110,8 @@ function WhaleBrainApp() {
   const [showChat, setShowChat] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
+  const [chatImage, setChatImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [chatLoading, setChatLoading] = useState(false);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -421,17 +423,18 @@ function WhaleBrainApp() {
   };
 
   const handleSendMessage = async () => {
-    if (!chatInput.trim() || chatLoading) return;
+    if ((!chatInput.trim() && !chatImage) || chatLoading) return;
 
     // Mobile: Desbloquear el audio context de forma sincrónica
     if (soundEnabled && audioRef.current) {
       audioRef.current.play().catch(() => { });
     }
 
-    const userMsg: ChatMessage = { role: 'user', text: chatInput };
+    const userMsg: ChatMessage = { role: 'user', text: chatInput, image: chatImage || undefined };
     const newHistory = [...chatMessages, userMsg];
     setChatMessages(newHistory);
     setChatInput('');
+    setChatImage(null);
     setChatLoading(true);
 
     try {
@@ -1102,7 +1105,7 @@ function WhaleBrainApp() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="px-4 py-2 flex gap-2 overflow-x-auto overflow-y-hidden scrollbar-hide max-w-full border-b border-zinc-800 bg-zinc-900/30">
+                <div className="px-4 py-3 flex flex-wrap gap-2 max-w-full border-b border-zinc-800 bg-zinc-900/30">
                   {[
                     ...(degenMode ? [
                       { label: 'Simulador All-In', icon: Zap, prompt: 'Haz un simulador de All-In para esta moneda con 1000 USDT.' },
@@ -1182,24 +1185,64 @@ function WhaleBrainApp() {
                   <div ref={chatEndRef} />
                 </div>
 
+                {/* Image Preview */}
+                {chatImage && (
+                  <div className="px-4 pt-3 pb-2 bg-zinc-900/50">
+                    <div className="relative inline-block group">
+                      <img src={chatImage} alt="Upload preview" className="h-16 max-w-full object-contain rounded-xl border border-zinc-700 shadow-lg shadow-black/50" />
+                      <button
+                        onClick={() => setChatImage(null)}
+                        className="absolute -top-2 -right-2 bg-rose-500 hover:bg-rose-600 rounded-full p-1 shadow-lg transition-colors"
+                      >
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Chat Input */}
                 <div className="p-4 border-t border-zinc-800 bg-zinc-900/50">
-                  <div className="relative">
+                  <div className="relative flex gap-2 items-center">
                     <input
-                      type="text"
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                      placeholder="Pregúntale a la ballena..."
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl py-3 pl-4 pr-12 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/10 text-sm transition-all"
+                      type="file"
+                      accept="image/*"
+                      ref={fileInputRef}
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => setChatImage(reader.result as string);
+                          reader.readAsDataURL(file);
+                        }
+                        e.target.value = ''; // Permite subir la misma foto de nuevo si la borra
+                      }}
                     />
                     <button
-                      onClick={handleSendMessage}
-                      disabled={chatLoading}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-emerald-400 hover:text-emerald-300 disabled:opacity-50 transition-colors"
+                      onClick={() => fileInputRef.current?.click()}
+                      title="Analizar captura o gráfico"
+                      className="p-3 bg-zinc-800 hover:bg-emerald-500/20 text-zinc-400 hover:text-emerald-400 rounded-2xl border border-zinc-700 hover:border-emerald-500/50 transition-colors shrink-0 shadow-inner"
                     >
-                      <Send className="w-5 h-5" />
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                     </button>
+
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                        placeholder={chatImage ? "Escribe algo sobre la imagen..." : "Pregúntale a la ballena..."}
+                        className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl py-3 pl-4 pr-12 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/10 text-sm transition-all"
+                      />
+                      <button
+                        onClick={handleSendMessage}
+                        disabled={chatLoading || (!chatInput.trim() && !chatImage)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-emerald-400 hover:text-emerald-300 disabled:opacity-50 transition-colors"
+                      >
+                        <Send className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
