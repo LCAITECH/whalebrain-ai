@@ -492,15 +492,16 @@ function WhaleBrainApp() {
     setShowShareCard(true);
   };
 
-  const handleSendMessage = async () => {
-    if ((!chatInput.trim() && !chatImage) || chatLoading) return;
+  const handleSendMessage = async (overrideText?: string | React.MouseEvent | any) => {
+    const inputText = typeof overrideText === 'string' ? overrideText : chatInput;
+    if ((!inputText.trim() && !chatImage) || chatLoading) return;
 
     // Mobile: Frenar el audio anterior si seguía sonando
     if (soundEnabled && audioRef.current) {
       audioRef.current.pause();
     }
 
-    const finalInput = chatInput.trim() || (chatImage ? "Che ballena, fíjate lo que te adjunto en esta imagen y tirame tu análisis Degen." : "");
+    const finalInput = inputText.trim() || (chatImage ? "Che ballena, fíjate lo que te adjunto en esta imagen y tirame tu análisis Degen." : "");
     const userMsg: ChatMessage = { role: 'user', text: finalInput, image: chatImage || undefined };
     const newHistory = [...chatMessages, userMsg];
     setChatMessages(newHistory);
@@ -1036,14 +1037,16 @@ function WhaleBrainApp() {
                         className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl py-5 px-6 pr-32 focus:outline-none focus:border-yellow-500/50 focus:ring-2 focus:ring-yellow-500/20 transition-all font-mono text-sm placeholder:text-zinc-600"
                       />
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          const inputVal = (e.target as any).previousSibling?.value || '0x...';
                           setShowToast(true);
                           setToastMessage("🚀 INTERCEPTO ON-CHAIN INICIADO... ESCANEANDO BILLETERA...");
                           setTimeout(() => setShowToast(false), 3000);
                           // Fake delay logic or just opening chat
                           setTimeout(() => {
                             setShowChat(true);
-                            setChatInput("Acabo de ingresar mi wallet en el Airdrop Checker. Analiza mi actividad reciente y dime qué airdrops top de 2026/2027 me estoy perdiendo y qué 3 tareas baratas puedo hacer HOY para calificar.");
+                            const msg = `Acabo de ingresar mi wallet (${inputVal}) en el Airdrop Checker. Analiza mi actividad reciente y dime qué airdrops top de 2026/2027 me estoy perdiendo y qué 3 tareas baratas puedo hacer HOY para calificar.`;
+                            handleSendMessage(msg);
                           }, 1000);
                         }}
                         className="absolute right-2 top-2 bottom-2 bg-yellow-500 hover:bg-yellow-400 text-black px-6 rounded-xl font-black uppercase text-xs tracking-widest transition-colors shadow-lg shadow-yellow-500/20"
