@@ -132,6 +132,13 @@ function WhaleBrainApp() {
     if (tg) {
       tg.ready();
       tg.expand();
+
+      // Deep Linking hook (startapp=airdrops)
+      if (tg.initDataUnsafe?.start_param === 'airdrops') {
+        setActiveTab('airdrops');
+        setRataMode(true);
+      }
+
       if (tg.initDataUnsafe?.user) {
         setTgUser(tg.initDataUnsafe.user);
 
@@ -1092,7 +1099,36 @@ function WhaleBrainApp() {
                         Scanear
                       </button>
                     </div>
-                    <div className="flex items-center justify-center gap-6 mt-6">
+
+                    {/* Hot Airdrops List (Misiones Activas) */}
+                    <div className="mt-8 mb-6 text-left relative z-10 bg-black/40 p-5 rounded-3xl border border-yellow-500/20 shadow-inner">
+                      <div className="flex items-center gap-2 mb-4 px-2">
+                        <Flame className="w-5 h-5 text-yellow-500 animate-pulse" />
+                        <h4 className="text-sm font-black uppercase text-white tracking-widest">Misiones Activas (Hot)</h4>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {[
+                          { name: 'Monad', desc: 'Interactuá con Testnet v8. Farmeo rápido sin riesgo.', tag: 'L1', link: 'https://testnet.monad.xyz', color: 'bg-indigo-500' },
+                          { name: 'Linea', desc: 'Completá la campaña LXP en Layer3.', tag: 'L2', link: 'https://linea.build', color: 'bg-blue-500' },
+                          { name: 'Berachain', desc: 'Hacé swaps diarios en la bArtio Testnet.', tag: 'DeFi', link: 'https://berachain.com', color: 'bg-amber-600' },
+                          { name: 'Scroll', desc: 'Proveé liquidez para ganar Marks (Puntos).', tag: 'ZkEVM', link: 'https://scroll.io', color: 'bg-yellow-500' }
+                        ].map((drop, idx) => (
+                          <a key={idx} href={drop.link} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all group">
+                            <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${drop.color} shadow-[0_0_10px_currentColor]`} />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-black text-white group-hover:text-yellow-400 transition-colors">{drop.name}</span>
+                                <span className="text-[9px] uppercase tracking-wider font-bold bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">{drop.tag}</span>
+                              </div>
+                              <p className="text-xs text-zinc-500 font-medium leading-relaxed">{drop.desc}</p>
+                            </div>
+                            <span className="text-zinc-600 group-hover:text-yellow-400 transition-colors text-lg font-black mt-1">↗</span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-6 mt-6 pt-6 border-t border-zinc-800/50">
                       <div className="flex flex-col items-center">
                         <span className="text-2xl font-black text-white">42+</span>
                         <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Protocolos Trackeados</span>
@@ -1107,8 +1143,13 @@ function WhaleBrainApp() {
                     <button
                       onClick={() => {
                         triggerHaptic('rigid');
-                        const text = encodeURIComponent("Che rata 🐀, vení a escanear tu wallet con esta inteligencia artificial que te canta los Airdrops antes que todo Crypto Twitter. Degen mode ON 🚀");
-                        const url = encodeURIComponent(window.location.href);
+                        const text = encodeURIComponent("Che rata 🐀, a ver??? 👀\n\nVení a escanear tu wallet con esta IA enferma que te canta los Airdrops antes que Crypto Twitter.\n\nVoy a traer a todas las ratitas como el flautista de Hamelín 🎶🐭🚀");
+
+                        // Limpiamos el #tgWebAppData horrible para que quede un link limpio y Telegram pueda armar el "Cartel Hermoso" (OpenGraph)
+                        // NOTA: Si este bot tiene un shortname, lo ideal es usar https://t.me/TuBotName/app?startapp=airdrops
+                        const cleanUrl = `${window.location.origin}${window.location.pathname}?startapp=airdrops`;
+                        const url = encodeURIComponent(cleanUrl);
+
                         const tg = (window as any).Telegram?.WebApp;
                         if (tg?.openTelegramLink) {
                           tg.openTelegramLink(`https://t.me/share/url?url=${url}&text=${text}`);
@@ -1312,7 +1353,13 @@ function WhaleBrainApp() {
                     onClick={() => selectCoin(coin.id)}
                     className="w-full flex items-center gap-4 p-4 hover:bg-zinc-800 transition-colors text-left border-b border-zinc-800 last:border-0"
                   >
-                    <img src={coin.thumb} alt={coin.name} className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" />
+                    {coin.thumb ? (
+                      <img src={coin.thumb} alt={coin.name} className="w-8 h-8 rounded-full bg-zinc-800" referrerPolicy="no-referrer" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-black text-xs uppercase border border-emerald-500/30">
+                        {coin.symbol.charAt(0)}
+                      </div>
+                    )}
                     <div>
                       <div className="font-bold">{coin.name}</div>
                       <div className="text-xs text-zinc-500 uppercase font-mono">{coin.symbol}</div>
