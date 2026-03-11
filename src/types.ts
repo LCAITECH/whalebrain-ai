@@ -40,6 +40,18 @@ export interface AnalysisResult {
   reasoning: string;
   keyFactors: string[];
   catchphrase: string; // Humorous/direct warning or encouragement
+  audit?: {
+    isHoneypot: boolean;
+    isAuditPassed: boolean;
+    isFreezable: boolean;
+    isMintable: boolean;
+    buyTax: string;
+    sellTax: string;
+    lpLocked: boolean;
+    renounced: boolean;
+    top10HoldersPercent: string;
+    creatorClean: boolean;
+  };
 }
 
 export interface ChatMessage {

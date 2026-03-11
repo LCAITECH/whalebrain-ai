@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { CoinData, SearchResult, AnalysisResult, ChatMessage } from './types';
-import { analyzeCoin, chatWithWhale, summarizeForAudio } from './services/geminiService';
+import { analyzeCoin, chatWithWhale, summarizeForAudio } from './services/aiService';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {

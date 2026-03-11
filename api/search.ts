@@ -29,8 +29,8 @@ export async function GET(req: Request) {
                         api_symbol: pair.baseToken.symbol,
                         symbol: pair.baseToken.symbol,
                         sort_value: pair.fdv || pair.liquidity.usd || 0,
-                        thumb: pair.info?.imageUrl || "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
-                        large: pair.info?.imageUrl || "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
+                        thumb: pair.info?.imageUrl || "",
+                        large: pair.info?.imageUrl || "",
                     });
                 }
             }
@@ -62,8 +62,8 @@ export async function GET(req: Request) {
                 name: coin.name,
                 api_symbol: coin.symbol,
                 symbol: coin.symbol,
-                thumb: coin.thumb || 'https://assets.coingecko.com/coins/images/279/standard/ethereum.png',
-                large: coin.large || 'https://assets.coingecko.com/coins/images/279/standard/ethereum.png',
+                thumb: coin.thumb && !coin.thumb.includes('missing_thumb') ? coin.thumb : "",
+                large: coin.large && !coin.large.includes('missing_large') ? coin.large : "",
                 market_cap_rank: coin.market_cap_rank || 9999
             }));
 
