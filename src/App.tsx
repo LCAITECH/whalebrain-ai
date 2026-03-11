@@ -510,7 +510,7 @@ function WhaleBrainApp() {
     setChatLoading(true);
 
     try {
-      const response = await chatWithWhale(newHistory, selectedCoin || undefined, degenMode, quickMode, activeTab);
+      const response = await chatWithWhale(newHistory, selectedCoin || undefined, degenMode, quickMode, activeTab, rataMode);
       setChatMessages([...newHistory, { role: 'model', text: response }]);
       if (soundEnabled) playWhaleAudio(response);
     } catch (err) {
