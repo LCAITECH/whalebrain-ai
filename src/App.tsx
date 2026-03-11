@@ -1113,7 +1113,9 @@ function WhaleBrainApp() {
                           { name: 'Ethereum (ETH)', desc: 'Restaking (EigenLayer, ether.fi). Mucha liquidez, alto gas.', tag: 'L1', link: 'https://ether.fi', color: 'bg-blue-600' },
                           { name: 'Monad', desc: 'Testnet activa. Farmeo rápido sin riesgo en la L1 paralela.', tag: 'L1 Hot', link: 'https://testnet.monad.xyz', color: 'bg-indigo-500' },
                           { name: 'Linea', desc: 'Campaña LXP en marcha. Interactuá con dApps.', tag: 'L2 Hot', link: 'https://linea.build', color: 'bg-cyan-500' },
-                          { name: 'AAVE (Incentivos)', desc: 'Mercado Lending pagando recompensas extra (Merit) en red Base.', tag: 'Lending', link: 'https://app.aave.com', color: 'bg-violet-500' }
+                          { name: 'AAVE (Incentivos)', desc: 'Mercado Lending pagando recompensas extra (Merit) en red Base.', tag: 'Lending', link: 'https://app.aave.com', color: 'bg-violet-500' },
+                          { name: 'Pixels ($PIXEL)', desc: 'Juego blockchain top en la red Ronin. Excelente economía de gaming.', tag: 'Gaming', link: 'https://play.pixels.xyz', color: 'bg-emerald-500' },
+                          { name: 'Ecosistema TON', desc: 'Mini-apps de Telegram. Tap-to-earn y DeFi nativo con bajo gas.', tag: 'SocialFi', link: 'https://ton.org', color: 'bg-sky-500' }
                         ].map((drop, idx) => (
                           <a key={idx} href={drop.link} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all group">
                             <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${drop.color} shadow-[0_0_10px_currentColor]`} />
