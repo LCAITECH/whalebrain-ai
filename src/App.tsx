@@ -160,8 +160,11 @@ function WhaleBrainApp() {
   const playWhaleAudio = async (text: string) => {
     if (!soundEnabled || !audioRef.current) return;
     try {
-      // Limpiar markdown simple para el TTS
-      const cleanText = text.replace(/[*_#]/g, '');
+      // Limpiar markdown y silenciar direcciones hexadecimales para no quemar tokens de TTS
+      const cleanText = text
+        .replace(/[*_#]/g, '')
+        .replace(/0x[a-fA-F0-9]{2,}\.\.\.[a-fA-F0-9]{2,}/gi, 'esta billetera')
+        .replace(/0x[a-fA-F0-9]{5,}/gi, 'este hash');
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
