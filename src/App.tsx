@@ -682,9 +682,9 @@ function WhaleBrainApp() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9998] pointer-events-none border-[8px] md:border-[16px] border-yellow-500/30 shadow-[inset_0_0_150px_rgba(234,179,8,0.4)] transition-colors duration-1000"
+            className="fixed inset-0 z-[9998] pointer-events-none border-[8px] md:border-[16px] border-yellow-500/50 shadow-[inset_0_0_300px_rgba(234,179,8,0.5)] transition-colors duration-1000"
           >
-            <div className="absolute inset-0 border-[2px] border-yellow-500/50 animate-pulse" />
+            <div className="absolute inset-0 border-[4px] border-yellow-400/60 animate-pulse mix-blend-overlay" />
             <div className="absolute inset-0 bg-yellow-500/[0.03]" />
 
             <div className="absolute inset-0 overflow-hidden">
@@ -815,7 +815,11 @@ function WhaleBrainApp() {
         </button>
 
         <button
-          onClick={() => setDegenMode(!degenMode)}
+          onClick={() => {
+            const nextState = !degenMode;
+            setDegenMode(nextState);
+            if (nextState) setActiveTab('contracts');
+          }}
           className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${degenMode
             ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]'
             : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
@@ -1502,12 +1506,20 @@ function WhaleBrainApp() {
                         {Math.abs(selectedCoin.market_data?.price_change_percentage_24h || 0).toFixed(2)}%
                       </div>
                     </div>
-                    <button
-                      onClick={shareAnalysis}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs font-bold transition-colors"
-                    >
-                      <Share2 className="w-3 h-3" /> Compartir
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => window.open(`https://dexscreener.com/search?q=${selectedCoin.id}`, '_blank')}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)] rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+                      >
+                        <Zap className="w-3 h-3" /> Comprar
+                      </button>
+                      <button
+                        onClick={shareAnalysis}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs font-bold transition-colors"
+                      >
+                        <Share2 className="w-3 h-3" /> Compartir
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -1644,7 +1656,7 @@ function WhaleBrainApp() {
               {!quickMode && activeTab === 'tokens' && selectedCoin.symbol && (
                 <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-4 overflow-hidden h-[500px]">
                   <iframe
-                    src={`https://s.tradingview.com/widgetembed/?symbol=CRYPTO:${selectedCoin.symbol.toUpperCase()}USDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D&overrides=%7B%7D&wordwrap=1&no_referral_id=1`}
+                    src={`https://s.tradingview.com/widgetembed/?symbol=${selectedCoin.symbol.toUpperCase()}USDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D&overrides=%7B%7D&wordwrap=1&no_referral_id=1`}
                     width="100%"
                     height="100%"
                     frameBorder="0"
