@@ -438,7 +438,7 @@ function WhaleBrainApp() {
     setChatLoading(true);
 
     try {
-      const response = await chatWithWhale(newHistory, selectedCoin || undefined, degenMode);
+      const response = await chatWithWhale(newHistory, selectedCoin || undefined, degenMode, quickMode);
       setChatMessages([...newHistory, { role: 'model', text: response }]);
       if (soundEnabled) playWhaleAudio(response);
     } catch (err) {
@@ -1232,7 +1232,23 @@ function WhaleBrainApp() {
                         value={chatInput}
                         onChange={(e) => setChatInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder={chatImage ? "Escribe algo sobre la imagen..." : "Pregúntale a la ballena..."}
+                        onPaste={(e) => {
+                          const items = e.clipboardData?.items;
+                          if (!items) return;
+                          for (let i = 0; i < items.length; i++) {
+                            if (items[i].type.indexOf('image') !== -1) {
+                              const file = items[i].getAsFile();
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => setChatImage(reader.result as string);
+                                reader.readAsDataURL(file);
+                                // Prevenir que pegue texto de nombre de archivo
+                                e.preventDefault();
+                              }
+                            }
+                          }
+                        }}
+                        placeholder={chatImage ? "Escribe algo sobre la imagen..." : "Pregúntale a la ballena (o pegá una imagen)..."}
                         className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl py-3 pl-4 pr-12 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/10 text-sm transition-all"
                       />
                       <button
