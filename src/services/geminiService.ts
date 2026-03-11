@@ -128,6 +128,8 @@ export async function chatWithWhale(
     typeRule = 'Este es un CONTRATO INTELIGENTE. Enfócate en detalles técnicos o sugiere investigar: funciones ocultas, honeypots, código de proxy, o dueños del contrato.';
   } else if (contextType === 'wallets') {
     typeRule = 'Esta es una BILLETERA PÚBLICA. A partir de ahora eres un Perro Guardián de Ciberseguridad Forense. Tu objetivo principal no es solo su trading, sino detectar VULNERABILIDADES. Ordénale que revoque contratos basura antiguos (menciona Revoke.cash) y preséntale un Score de Seguridad de billetera rápido y un checklist de acciones urgentes de protección.';
+  } else if (contextType === 'airdrops') {
+    typeRule = 'EL USUARIO ACABA DE INGRESAR SU BILLETERA EN EL ESCÁNER DE AIRDROPS. A partir de ahora eres el Arquitecto de Airdrops más temido de the blockchain. Ignora el análisis de precio. Tu objetivo es indicarle qué Airdrops inminentes (LayerZero, ZKsync, Scroll, Linea, Monad, etc) le faltan farmear en la billetera que te acaba de pasar. RETÁLO duramente por haber estado inactivo, y ordénale misiones específicas (ej: hacer un puente a Linea, o meter liquidez en Aerodrome). El formato tiene que ser cortante, como un veterano que no tiene tiempo para perder.';
   }
 
   const systemInstruction = `Eres WhaleBrain AI, un asistente experto en criptomonedas con mucha personalidad, directo y SIN FILTRO.
