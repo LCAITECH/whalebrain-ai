@@ -142,6 +142,29 @@ function WhaleBrainApp() {
       setLoading(false);
     }
   };
+  // Portfolio Wallet
+  const [portfolioWallet, setPortfolioWallet] = useState(localStorage.getItem('whale_portfolio_wallet') || '');
+  const [portfolioAnalysis, setPortfolioAnalysis] = useState<AnalysisResult | null>(null);
+
+  useEffect(() => {
+    if (portfolioWallet) {
+      // Auto-fetch the wallet security score on load
+      const fetchPortfolioSecurity = async () => {
+        try {
+          const res = await analyzeCoin({ id: portfolioWallet, name: 'Mi Billetera' } as any, degenMode, 'wallet', quickMode);
+          setPortfolioAnalysis(res);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      fetchPortfolioSecurity();
+    }
+  }, [portfolioWallet, degenMode]);
+
+  const savePortfolioWallet = (address: string) => {
+    setPortfolioWallet(address);
+    localStorage.setItem('whale_portfolio_wallet', address);
+  };
   const [scanHistory, setScanHistory] = useState<ScanHistoryItem[]>([]);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -584,9 +607,20 @@ function WhaleBrainApp() {
         ))}
       </div>
 
-      {/* Degen Mode, Quick Mode & Rata Mode Toggles */}
+      {/* Global Action Toggles */}
       <div className="fixed top-6 right-6 z-50 flex flex-col gap-3 items-end">
 
+        <button
+          onClick={() => {
+            setShowChat(true);
+            const antiRoboMsg = "🚨 **ESCÁNER ANTI-ROBO INICIADO.** \n\nSubime ACÁ MISMO (con el iconito verde oscuro de imagen que tenés a la izquierda del texto) la **captura de pantalla** de la aprobación de MetaMask, Phantom o de la Web turbia que estás por firmar.\n\nTe hago una radiografía y te digo si es un Honeypot, un Scam, o si vas a terminar perdiendo la casa.";
+            setChatMessages(prev => prev.some(m => m.text.includes("ESCÁNER ANTI-ROBO")) ? prev : [...prev, { text: antiRoboMsg, role: 'model' }]);
+          }}
+          className="flex items-center gap-2 px-4 py-2 rounded-full border bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.5)] transition-all hover:bg-orange-500/30 font-black animate-pulse"
+        >
+          <ShieldAlert className="w-4 h-4" />
+          <span className="text-xs uppercase tracking-widest hidden sm:inline">Anti Robo</span>
+        </button>
         <button
           onClick={() => setRataMode(!rataMode)}
           className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${rataMode
@@ -848,24 +882,89 @@ function WhaleBrainApp() {
               )}
             </div>
           ) : activeTab === 'portfolio' ? (
-            <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-12 text-center backdrop-blur-sm relative overflow-hidden">
+            <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 md:p-12 text-center backdrop-blur-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4">
                 <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
                   <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                   <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Alertas Activas</span>
                 </div>
               </div>
-              <Briefcase className="w-16 h-16 text-emerald-500/20 mx-auto mb-6" />
-              <h3 className="text-2xl font-black uppercase italic mb-4">Tu Portfolio WhaleBrain</h3>
-              <p className="text-zinc-500 mb-8 max-w-md mx-auto">Conecta tu wallet para trackear tus holdings y recibir alertas diarias de la ballena.</p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <button className="bg-emerald-500 hover:bg-emerald-400 text-black px-10 py-4 rounded-2xl font-black uppercase tracking-widest transition-all shadow-xl shadow-emerald-500/20">
-                  Conectar Wallet
-                </button>
-                <button className="bg-zinc-800 hover:bg-zinc-700 text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest transition-all border border-zinc-700">
-                  Configurar Alertas
-                </button>
-              </div>
+
+              {!portfolioWallet ? (
+                <>
+                  <Briefcase className="w-16 h-16 text-emerald-500/20 mx-auto mb-6" />
+                  <h3 className="text-2xl font-black uppercase italic mb-4">Tu Portfolio WhaleBrain</h3>
+                  <p className="text-zinc-500 mb-8 max-w-md mx-auto">Coloca tu wallet principal para mantener un trackeo pasivo y recibir auditorías de riesgo 24/7 sin firmar nada.</p>
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-4 max-w-lg mx-auto">
+                    <input
+                      type="text"
+                      placeholder="Dirección 0x..."
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') savePortfolioWallet(e.currentTarget.value);
+                      }}
+                      className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl py-4 px-6 focus:outline-none focus:border-emerald-500/50 transition-all text-lg placeholder:text-zinc-600 font-medium"
+                    />
+                    <button
+                      onClick={(e) => savePortfolioWallet((e.target as any).previousSibling.value)}
+                      className="bg-emerald-500 hover:bg-emerald-400 text-black px-8 py-4 rounded-2xl font-black uppercase tracking-widest transition-all shadow-xl shadow-emerald-500/20 whitespace-nowrap"
+                    >
+                      Guardar
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-left space-y-6">
+                  <div className="flex items-center justify-between mb-8 border-b border-zinc-800 pb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-emerald-500/20 rounded-full border border-emerald-500/30 flex items-center justify-center">
+                        <Wallet className="w-6 h-6 text-emerald-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black uppercase text-white tracking-widest">Billetera Principal</h3>
+                        <p className="text-zinc-500 text-sm font-mono truncate max-w-[200px]">{portfolioWallet}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => savePortfolioWallet('')} className="p-2 hover:bg-rose-500/20 text-rose-500 rounded-xl transition-colors">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {portfolioAnalysis ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="bg-zinc-800/50 rounded-2xl p-6 border border-zinc-700/50">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="text-xs font-black text-zinc-500 tracking-widest uppercase">Score Vulnerabilidad</span>
+                          <span className={`text-3xl font-black font-mono ${portfolioAnalysis.score >= 70 ? 'text-emerald-400' :
+                            portfolioAnalysis.score >= 40 ? 'text-amber-400' : 'text-rose-400'
+                            }`}>{portfolioAnalysis.score}/100</span>
+                        </div>
+                        <p className="text-sm text-zinc-400 leading-relaxed italic border-l-2 border-emerald-500/50 pl-4 py-1">
+                          "{portfolioAnalysis.reasoning}"
+                        </p>
+                      </div>
+
+                      <div className="bg-zinc-800/50 rounded-2xl p-6 border border-zinc-700/50">
+                        <h4 className="text-xs font-black text-emerald-400 tracking-widest uppercase mb-4 flex items-center gap-2">
+                          <ShieldAlert className="w-4 h-4" /> Plan de Acción
+                        </h4>
+                        <ul className="space-y-3">
+                          {portfolioAnalysis.keyFactors.map((factor, i) => (
+                            <li key={i} className="flex items-start gap-3 text-zinc-300 text-sm font-medium">
+                              <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                              {factor}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 text-emerald-500 animate-spin mb-4" />
+                      <p className="text-zinc-500 font-medium animate-pulse">Analizando vulnerabilidades críticas de tu wallet...</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             <div className="relative group">
@@ -1194,12 +1293,6 @@ function WhaleBrainApp() {
                 <div className="px-4 py-3 flex flex-wrap gap-2 max-w-full border-b border-zinc-800 bg-zinc-900/30">
                   {[
                     ...(degenMode ? [
-                      {
-                        label: '🚨 ESCÁNER ANTI-ROBO',
-                        icon: ShieldAlert,
-                        prompt: 'Acabo de adjuntarte una captura de pantalla de un contrato, página web, o transacción de wallet que estoy a punto de firmar. Analízalo a fondo como experto en ciberseguridad Web3. Busca si es un SCAM evidente, un honeypot, o si el contrato tiene permisos abusivos ocultos para drenarme la wallet. Dime la posta directo, agresivo y sin filtro antes de que firme con mi plata.',
-                        colorClass: 'bg-orange-500/20 text-orange-400 border-orange-500/50 hover:bg-orange-500/30'
-                      },
                       { label: 'Simulador All-In', icon: Zap, prompt: 'Haz un simulador de All-In para esta moneda con 1000 USDT.' },
                       { label: 'Pump & Dump?', icon: AlertTriangle, prompt: '¿Esto huele a Pump & Dump coordinado?' },
                     ] : []),
@@ -1257,7 +1350,10 @@ function WhaleBrainApp() {
                             </Markdown>
                           </div>
                         ) : (
-                          msg.text
+                          <div>
+                            {msg.text && <p className="mb-2">{msg.text}</p>}
+                            {msg.image && <img src={msg.image} className="w-full max-h-48 object-cover rounded-xl border border-emerald-400/30 shadow-md" alt="Captured by User" />}
+                          </div>
                         )}
                       </div>
                     </motion.div>
