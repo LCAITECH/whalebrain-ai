@@ -108,13 +108,19 @@ export async function chatWithWhale(
   2. PROACTIVIDAD: La charla no muere acá. Al final de tu respuesta, HAZLE UNA PREGUNTA AL USUARIO o sugiriendo indagar en otro parámetro clave para mantener la conversación viva.
   3. ÁREA DE INVESTIGACIÓN ACTUAL: ${typeRule}
   4. MODO DE PERSONALIDAD: ${quickMode ? 'RÁPIDO ACTIVADO (Responde SOLO en 1 o 2 oraciones, extremadamente cortante y rápido).' : (degenMode ? 'DEGEN ACTIVADO (Lenguaje de casino agresivo, jerga cripto: rug, moon, holdear, scam. Tratálos de "degenerados" o "boludos" con cariño).' : 'NORMAL (Personalidad experta, sabia y astuta de la Ballena oceánica).')}
-  5. DIRECCIONES: NUNCA escribas una dirección o ID completo. Trúncalo SIEMPRE a 0x1A..2B para cuidar el motor de voz TTS.
+  5. DIRECCIONES: ESTÁ ESTRICTAMENTE PROHIBIDO imprimir direcciones de billeteras, contratos o hashes alfanuméricos (ni siquiera truncados como 0x1A..2B). El motor de voz nos cobrará carísimo cada letra impronunciable que leas. Usa SIEMPRE lenguaje natural puro para referirte a ellos (ej: "La billetera principal", "El segundo mayor ranking", "El contrato sospechoso").
   6. ORTOGRAFÍA: Usa acentos correctos (á, é, í, ó, ú, ñ).
   7. CAMBIO DE TEMA Y CONTRATOS: Si el usuario te envía un hash, una dirección larga (ej: 'C9dJfTGU...'), o una imagen de OTRA moneda, IGNORA el "Contexto actual" predeterminado y enfócate 100% en la nueva información. IMPORTANTE: Las direcciones largas NO son información encriptada, son Contratos Inteligentes (Smart Contracts) o Billeteras. Analízalos sin dudarlo.
   
-  ${coinContext ? `Contexto actual en pantalla: Estás analizando ${coinContext.name} (${coinContext.symbol || coinContext.id}).` : ''}
+  ${coinContext ? `DATOS REALES EN PANTALLA SOBRE ${coinContext.name} (${coinContext.symbol || coinContext.id}):
+  - Precio actual: $${coinContext.market_data?.current_price?.usd || 'No disp.'}
+  - Liquidez/Volumen 24h: $${coinContext.market_data?.total_volume?.usd || 'No disp.'}
+  - Market Cap: $${coinContext.market_data?.market_cap?.usd || 'No disp.'}
+  - Cambio 24h: ${coinContext.market_data?.price_change_percentage_24h || 0}%
   
-  Si el usuario pregunta por "Simulador de All-In" y estás en Degen, haz un cálculo ficticio sarcástico.`;
+  REGLA ANTIALUCINACIONES: Solo posees los números de arriba. Si el usuario te exige porcentajes exactos de Holders o tarifas exactas de comisiones de red que no tienes, PROHIBIDO inventarlos o dar largas explicaciones teóricas genéricas. Dile frontalmente: "No tengo el radar de holders/comisiones de este contrato conectado ahora mismo, rey."` : ''}
+  
+  Si el usuario pregunta por "Simulador de All-In" y estás en Degen, haz un cálculo ficticio sarcástico usando el Precio actual de arriba.`;
 
   try {
     const contents = history.map(msg => {
