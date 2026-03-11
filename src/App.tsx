@@ -122,6 +122,27 @@ function WhaleBrainApp() {
   const [activeTab, setActiveTab] = useState<'tokens' | 'contracts' | 'wallets' | 'compare' | 'portfolio' | 'academy' | 'airdrops'>('tokens');
   const [compareAddresses, setCompareAddresses] = useState({ addr1: '', addr2: '' });
   const [compareResults, setCompareResults] = useState<{ res1: AnalysisResult | null, res2: AnalysisResult | null }>({ res1: null, res2: null });
+  const [tgUser, setTgUser] = useState<any>(null);
+
+  // Telegram Mini App Initialization
+  useEffect(() => {
+    const tg = (window as any).Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      if (tg.initDataUnsafe?.user) {
+        setTgUser(tg.initDataUnsafe.user);
+      }
+    }
+  }, []);
+
+  // Haptic Feedback Helper
+  const triggerHaptic = (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft' = 'heavy') => {
+    const tg = (window as any).Telegram?.WebApp;
+    if (tg?.HapticFeedback) {
+      tg.HapticFeedback.impactOccurred(style);
+    }
+  };
 
   // Si se activa Modo Rata, forzamos a la pestaña de airdrops
   useEffect(() => {
@@ -612,6 +633,7 @@ function WhaleBrainApp() {
 
         <button
           onClick={() => {
+            triggerHaptic('heavy');
             setShowChat(true);
             const antiRoboMsg = "🚨 **ESCÁNER ANTI-ROBO INICIADO.** \n\nSubime ACÁ MISMO (con el iconito verde oscuro de imagen que tenés a la izquierda del texto) la **captura de pantalla** de la aprobación de MetaMask, Phantom o de la Web turbia que estás por firmar.\n\nTe hago una radiografía y te digo si es un Honeypot, un Scam, o si vas a terminar perdiendo la casa.";
             setChatMessages(prev => prev.some(m => m.text.includes("ESCÁNER ANTI-ROBO")) ? prev : [...prev, { text: antiRoboMsg, role: 'model' }]);
@@ -703,6 +725,12 @@ function WhaleBrainApp() {
               <Brain className="w-8 h-8 text-emerald-400" />
             </div>
           </motion.div>
+          {tgUser && (
+            <div className="flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 font-black uppercase text-[10px] rounded-full mx-auto mb-4 w-fit shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              🎯 Operando Alpha como @{tgUser.username || tgUser.first_name}
+            </div>
+          )}
           <h1 className={`text-4xl md:text-6xl font-black tracking-tight mb-2 bg-gradient-to-r from-white via-emerald-400 to-blue-500 bg-clip-text text-transparent uppercase italic transition-all duration-500 ${degenMode ? 'drop-shadow-[0_0_15px_rgba(16,185,129,0.8)] scale-105' : ''}`}>
             TRADE LIKE A WHALE
           </h1>
@@ -920,6 +948,24 @@ function WhaleBrainApp() {
                         <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Farmeados por usuarios</span>
                       </div>
                     </div>
+
+                    <button
+                      onClick={() => {
+                        triggerHaptic('rigid');
+                        const text = encodeURIComponent("Che rata 🐀, vení a escanear tu wallet con esta inteligencia artificial que te canta los Airdrops antes que todo Crypto Twitter. Degen mode ON 🚀");
+                        const url = encodeURIComponent(window.location.href);
+                        const tg = (window as any).Telegram?.WebApp;
+                        if (tg?.openTelegramLink) {
+                          tg.openTelegramLink(`https://t.me/share/url?url=${url}&text=${text}`);
+                        } else {
+                          window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
+                        }
+                      }}
+                      className="w-full mt-8 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      Invitar Ratas & Ganar Multiplicador (Share Alpha)
+                    </button>
                   </div>
                 </div>
               </div>
