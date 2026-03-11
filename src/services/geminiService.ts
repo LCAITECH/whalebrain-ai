@@ -187,3 +187,18 @@ export async function chatWithWhale(
     return "Uy loco, se me trabó el análisis de datos. Intentalo de nuevo, el mercado me mareó.";
   }
 }
+
+export async function summarizeForAudio(text: string): Promise<string> {
+  const prompt = `Sos una ballena experta en cripto y seguridad. Resumí el siguiente análisis técnico en un máximo de 140 caracteres. Usá tono sarcástico, mafioso y directo. No uses códigos hexadecimales ni tecnicismos pesados. El objetivo es que un degen entienda si debe comprar o huir. Texto a resumir: ${text}`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+    });
+    return response.text || "No te escucho, el mercado está muy ruidoso.";
+  } catch (e) {
+    console.error("Error summarizeForAudio:", e);
+    return "Uy, la red está colapsada. Leé el texto, gordo.";
+  }
+}
