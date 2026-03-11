@@ -278,6 +278,9 @@ function WhaleBrainApp() {
   };
 
   const selectCoin = async (coinId: string) => {
+    // Mobile iOS: Desbloquear stream de audio sincrónicamente con el tap del usuario
+    if (soundEnabled && audioRef.current) audioRef.current.play().catch(() => { });
+
     if (coinId.length >= 30) {
       setQuery(coinId);
       analyzeAddress(coinId);
@@ -325,6 +328,9 @@ function WhaleBrainApp() {
   };
 
   const analyzeAddress = async (overrideAddress?: any) => {
+    // Mobile iOS: Desbloquear stream de audio sincrónicamente con el tap del usuario
+    if (soundEnabled && audioRef.current) audioRef.current.play().catch(() => { });
+
     const targetAddress = typeof overrideAddress === 'string' ? overrideAddress : query;
     if (targetAddress.length < 30) return;
 
@@ -398,8 +404,42 @@ function WhaleBrainApp() {
     triggerToast('¡Copiado al portapapeles!');
   };
 
-  const shareAnalysis = () => {
+  const shareAnalysis = async () => {
     if (!selectedCoin || !analysis) return;
+
+    const element = document.getElementById('share-card');
+    if (element) {
+      triggerToast('Generando carta viral... 📸');
+      try {
+        const html2canvas = (await import('html2canvas')).default;
+
+        // Add a temporary class to ensure it's fully visible and styled for the screenshot
+        element.classList.add('bg-zinc-950', 'p-6', 'rounded-3xl');
+
+        const canvas = await html2canvas(element, {
+          backgroundColor: '#09090b',
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false
+        });
+
+        element.classList.remove('bg-zinc-950', 'p-6', 'rounded-3xl');
+
+        const image = canvas.toDataURL("image/png");
+        const link = document.createElement('a');
+        link.download = `WhaleBrain_${selectedCoin.symbol.toUpperCase()}_Analysis.png`;
+        link.href = image;
+        link.click();
+
+        triggerToast('¡Carta Viral descargada! 🐋📸');
+        return; // Skip default sharing if image downloaded successfully
+      } catch (err) {
+        console.error("Error generating share image:", err);
+        triggerToast('Error generado la imagen. Copiando texto...');
+      }
+    }
+
     const shareText = `🐋 WhaleBrain AI Analysis: ${selectedCoin.name}\n📈 Score: ${analysis.score}/100\n💡 Recommendation: ${analysis.recommendation}\n💬 "${analysis.catchphrase}"\n\nAnaliza tus gemas en WhaleBrain AI!`;
 
     if (navigator.share) {
@@ -533,7 +573,19 @@ function WhaleBrainApp() {
           </motion.div>
         )}
         <button
-          onClick={() => setSoundEnabled(!soundEnabled)}
+          onClick={() => {
+            const ambient = document.getElementById('ambient-audio') as HTMLAudioElement;
+            if (!soundEnabled) {
+              setSoundEnabled(true);
+              if (ambient) {
+                ambient.volume = 0.05;
+                ambient.play().catch(e => console.error("Audio Ambient Blocked:", e));
+              }
+            } else {
+              setSoundEnabled(false);
+              if (ambient) ambient.pause();
+            }
+          }}
           className="p-3 bg-zinc-900/80 border border-zinc-800 rounded-full text-zinc-400 hover:text-white transition-colors relative"
         >
           {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
@@ -882,9 +934,10 @@ function WhaleBrainApp() {
             </div>
           ) : selectedCoin && analysis ? (
             <motion.div
+              id="share-card"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-8"
+              className="space-y-8 relative"
             >
               {/* Personality Catchphrase */}
               <motion.div
@@ -954,18 +1007,26 @@ function WhaleBrainApp() {
                 </div>
 
                 {/* Recommendation Banner */}
-                <div className={`flex items-center gap-4 p-6 rounded-2xl border-2 ${getRecommendationColor(analysis.recommendation)} relative z-10`}>
-                  <div className="p-3 bg-white/10 rounded-xl shadow-inner">
-                    {getRecommendationIcon(analysis.recommendation)}
+                <div className={`flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 p-6 rounded-2xl border-2 ${getRecommendationColor(analysis.recommendation)} relative z-10`}>
+                  <div className="flex w-full sm:w-auto items-center justify-between sm:justify-start gap-4">
+                    <div className="p-3 bg-white/10 rounded-xl shadow-inner shrink-0">
+                      {getRecommendationIcon(analysis.recommendation)}
+                    </div>
+                    <div className="text-left">
+                      <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] opacity-70 font-black leading-tight">Señal de la Ballena</div>
+                      <div className="text-xl sm:text-2xl font-black italic break-words">{getRecommendationLabel(analysis.recommendation)}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xs uppercase tracking-[0.2em] opacity-70 font-black">Señal de la Ballena</div>
-                    <div className="text-2xl font-black italic">{getRecommendationLabel(analysis.recommendation)}</div>
-                  </div>
-                  <div className="ml-auto text-right">
-                    <div className="text-xs uppercase tracking-[0.2em] opacity-70 font-black">Score de Seguridad</div>
-                    <div className={`text-3xl font-mono font-black ${analysis.score < 30 ? 'animate-pulse' : ''}`}>
-                      {analysis.score}<span className="text-sm opacity-50">/100</span>
+
+                  <div className="w-full h-px bg-white/10 sm:hidden my-1"></div>
+
+                  <div className="flex w-full sm:w-auto sm:ml-auto items-center justify-between sm:justify-end text-left sm:text-right">
+                    <div className="sm:hidden text-[10px] uppercase tracking-[0.2em] opacity-70 font-black leading-tight text-zinc-400">Score Global</div>
+                    <div className="text-right">
+                      <div className="hidden sm:block text-xs uppercase tracking-[0.2em] opacity-70 font-black">Score de Seguridad</div>
+                      <div className={`text-3xl font-mono font-black ${analysis.score < 30 ? 'animate-pulse' : ''}`}>
+                        {analysis.score}<span className="text-sm opacity-50">/100</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -998,6 +1059,19 @@ function WhaleBrainApp() {
                       ))}
                     </ul>
                   </div>
+                </div>
+              )}
+
+              {/* TradingView Widget - Solo para Tokens */}
+              {!quickMode && activeTab === 'search' && selectedCoin.symbol && (
+                <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-4 overflow-hidden h-[500px]">
+                  <iframe
+                    src={`https://s.tradingview.com/widgetembed/?symbol=CRYPTO:${selectedCoin.symbol.toUpperCase()}USD&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D&overrides=%7B%7D&wordwrap=1&no_referral_id=1`}
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    allowFullScreen
+                  />
                 </div>
               )}
 
