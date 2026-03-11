@@ -37,42 +37,42 @@ export async function analyzeCoin(coinData: CoinData, degenMode: boolean = false
     Genera una "catchphrase" con mucha personalidad (estilo WhaleBrain AI Degen).
   `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          recommendation: {
-            type: Type.STRING,
-            description: "SAFE, WAIT, o CAUTION",
-          },
-          score: {
-            type: Type.NUMBER,
-            description: "Puntaje de seguridad de 0 a 100",
-          },
-          reasoning: {
-            type: Type.STRING,
-            description: "Explicación directa y sin filtro en español (máx 150 palabras)",
-          },
-          keyFactors: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: "Máximo 3 factores clave",
-          },
-          catchphrase: {
-            type: Type.STRING,
-            description: "Frase picante y meme en español",
-          },
-        },
-        required: ["recommendation", "score", "reasoning", "keyFactors", "catchphrase"],
-      },
-    },
-  });
-
   try {
+    const response = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            recommendation: {
+              type: Type.STRING,
+              description: "SAFE, WAIT, o CAUTION",
+            },
+            score: {
+              type: Type.NUMBER,
+              description: "Puntaje de seguridad de 0 a 100",
+            },
+            reasoning: {
+              type: Type.STRING,
+              description: "Explicación directa y sin filtro en español (máx 150 palabras)",
+            },
+            keyFactors: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
+              description: "Máximo 3 factores clave",
+            },
+            catchphrase: {
+              type: Type.STRING,
+              description: "Frase picante y meme en español",
+            },
+          },
+          required: ["recommendation", "score", "reasoning", "keyFactors", "catchphrase"],
+        },
+      },
+    });
+
     return JSON.parse(response.text || "{}") as AnalysisResult;
   } catch (e) {
     console.error("Error parsing Gemini response:", e);
@@ -102,25 +102,30 @@ export async function chatWithWhale(history: ChatMessage[], coinContext?: CoinDa
   Si el usuario pregunta por "Simulador de All-In", haz un cálculo ficticio agresivo: "Si metés 500 USDT ahora, podrías sacar 10k o quedarte en la calle. ¿Jugamos?".
   Si el usuario pregunta por "Pump & Dump", analiza si el volumen y precio huelen a estafa coordinada.`;
 
-  const chat = ai.chats.create({
-    model: "gemini-3-flash-preview",
-    config: {
-      systemInstruction,
-    },
-  });
+  try {
+    const chat = ai.chats.create({
+      model: "gemini-1.5-flash",
+      config: {
+        systemInstruction,
+      },
+    });
 
-  // Convert history to Gemini format
-  const contents = history.map(msg => ({
-    role: msg.role === 'user' ? 'user' : 'model',
-    parts: [{ text: msg.text }]
-  }));
+    // Convert history to Gemini format
+    const contents = history.map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.text }]
+    }));
 
-  // We send the last message
-  const lastMessage = contents.pop();
-  
-  const response = await chat.sendMessage({
-    message: lastMessage?.parts[0].text || "Hola",
-  });
+    // We send the last message
+    const lastMessage = contents.pop();
+    
+    const response = await chat.sendMessage({
+      message: lastMessage?.parts[0].text || "Hola",
+    });
 
-  return response.text || "No sé qué decirte, el mar está muy profundo hoy.";
+    return response.text || "No sé qué decirte, el mar está muy profundo hoy.";
+  } catch (e) {
+    console.error("Error chatting with Gemini:", e);
+    return "Uy loco, se me trabó el análisis de datos. Intentalo de nuevo, el mercado me mareó.";
+  }
 }
