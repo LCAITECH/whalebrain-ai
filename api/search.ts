@@ -1,58 +1,67 @@
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('query');
+    const isDegen = searchParams.get('degen') === 'true';
 
     if (!query) {
-        return new Response(JSON.stringify({ error: "query parameter is missing" }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' },
-        });
+        return new Response(JSON.stringify({ error: "query parameter is missing" }), { status: 400 });
     }
 
-    const url = `https://api.dexscreener.com/latest/dex/search?q=${query}`;
-
     try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Failed to search coins on DexScreener");
-        const data = await res.json();
-        const pairs = data.pairs || [];
+        if (isDegen) {
+            // MODO DEGEN: Escáner de Contratos y Memecoins en DexScreener
+            const res = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(query)}`);
+            if (!res.ok) throw new Error("Failed to search coins on DexScreener");
+            const data = await res.json();
+            const pairs = data.pairs || [];
 
-        // DexScreener puede devolver el mismo token en varios pares (distintos DEX o Pools)
-        // Agrupamos por baseToken.address para no repetir la moneda visualmente
-        const uniqueTokens = [];
-        const seenAddresses = new Set();
+            const uniqueTokens: any[] = [];
+            const seenAddresses = new Set();
 
-        for (const pair of pairs) {
-            // Ignorar basura sin liquidity
-            if (!pair.liquidity || pair.liquidity.usd < 100) continue;
-
-            const address = pair.baseToken.address;
-            if (!seenAddresses.has(address)) {
-                seenAddresses.add(address);
-                uniqueTokens.push({
-                    id: address,
-                    name: pair.baseToken.name,
-                    api_symbol: pair.baseToken.symbol,
-                    symbol: pair.baseToken.symbol,
-                    market_cap_rank: pair.fdv || pair.liquidity.usd || 0, // Usamos FDV para ordernar luego
-                    thumb: pair.info?.imageUrl || "https://dd.dexscreener.com/ds-data/tokens/default.png",
-                    large: pair.info?.imageUrl || "https://dd.dexscreener.com/ds-data/tokens/default.png",
-                });
+            for (const pair of pairs) {
+                if (!pair.liquidity || pair.liquidity.usd < 100) continue;
+                const address = pair.baseToken.address;
+                if (!seenAddresses.has(address)) {
+                    seenAddresses.add(address);
+                    uniqueTokens.push({
+                        id: address,
+                        name: pair.baseToken.name,
+                        api_symbol: pair.baseToken.symbol,
+                        symbol: pair.baseToken.symbol,
+                        market_cap_rank: pair.fdv || pair.liquidity.usd || 0,
+                        thumb: pair.info?.imageUrl || "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
+                        large: pair.info?.imageUrl || "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
+                    });
+                }
             }
+            uniqueTokens.sort((a, b) => b.market_cap_rank - a.market_cap_rank);
+            return new Response(JSON.stringify({ coins: uniqueTokens.slice(0, 15) }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+
+        } else {
+            // MODO NORMAL (SAFE): CoinGecko Native Search (Precios top-100 reales, soluciona bug de INJ)
+            const cgRes = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(query)}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    ...(process.env.COINGECKO_API_KEY && { 'x-cg-demo-api-key': process.env.COINGECKO_API_KEY })
+                }
+            });
+            if (!cgRes.ok) throw new Error('CoinGecko API Error');
+            const data = await cgRes.json();
+
+            const results = (data.coins || []).slice(0, 15).map((coin: any) => ({
+                id: coin.id,
+                name: coin.name,
+                api_symbol: coin.symbol,
+                symbol: coin.symbol,
+                thumb: coin.thumb || 'https://assets.coingecko.com/coins/images/279/standard/ethereum.png',
+                large: coin.large || 'https://assets.coingecko.com/coins/images/279/standard/ethereum.png',
+                market_cap_rank: coin.market_cap_rank || 9999
+            }));
+
+            return new Response(JSON.stringify({ coins: results }), { status: 200, headers: { 'Content-Type': 'application/json' } });
         }
-
-        // Ordenar los resultados por FDV o Liquidez (los más grandes primero)
-        uniqueTokens.sort((a, b) => b.market_cap_rank - a.market_cap_rank);
-
-        return new Response(JSON.stringify({ coins: uniqueTokens.slice(0, 15) }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-        });
     } catch (error) {
         console.error("Error searching coins:", error);
-        return new Response(JSON.stringify({ error: "Internal server error" }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
+        return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 }
