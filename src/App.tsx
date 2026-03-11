@@ -8,7 +8,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import { CoinData, SearchResult, AnalysisResult, ChatMessage } from './types';
-import { analyzeCoin, chatWithWhale } from './services/geminiService';
+import { analyzeCoin, chatWithWhale, summarizeForAudio } from './services/geminiService';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
@@ -113,6 +113,7 @@ function WhaleBrainApp() {
   const [chatImage, setChatImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [chatLoading, setChatLoading] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(false);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -208,17 +209,25 @@ function WhaleBrainApp() {
 
   // Play audio via ElevenLabs TTS
   const playWhaleAudio = async (text: string) => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || audioLoading) return;
+
+    // Mobile/Safari Async Audio Unlock Workaround
+    audioRef.current.play().catch(() => { });
+
     try {
+      setAudioLoading(true);
       // Limpiar markdown y silenciar direcciones hexadecimales para no quemar tokens de TTS
       const cleanText = text
         .replace(/[*_#]/g, '')
         .replace(/0x[a-fA-F0-9]{2,}\.\.\.[a-fA-F0-9]{2,}/gi, 'esta billetera')
         .replace(/0x[a-fA-F0-9]{5,}/gi, 'este hash');
+
+      const compressedScript = await summarizeForAudio(cleanText);
+
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: cleanText })
+        body: JSON.stringify({ text: compressedScript })
       });
       if (res.ok) {
         const blob = await res.blob();
@@ -230,6 +239,8 @@ function WhaleBrainApp() {
       }
     } catch (err) {
       console.error('Error playing TTS:', err);
+    } finally {
+      setAudioLoading(false);
     }
   };
 
@@ -1435,7 +1446,7 @@ function WhaleBrainApp() {
               {!quickMode && activeTab === 'tokens' && selectedCoin.symbol && (
                 <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-4 overflow-hidden h-[500px]">
                   <iframe
-                    src={`https://s.tradingview.com/widgetembed/?symbol=CRYPTO:${selectedCoin.symbol.toUpperCase()}USD&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D&overrides=%7B%7D&wordwrap=1&no_referral_id=1`}
+                    src={`https://s.tradingview.com/widgetembed/?symbol=CRYPTO:${selectedCoin.symbol.toUpperCase()}USDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D&overrides=%7B%7D&wordwrap=1&no_referral_id=1`}
                     width="100%"
                     height="100%"
                     frameBorder="0"
@@ -1534,9 +1545,11 @@ function WhaleBrainApp() {
                   <div className="px-4 py-3 border-b border-zinc-800 bg-zinc-900/40 flex justify-center">
                     <button
                       onClick={() => playWhaleAudio(chatMessages[chatMessages.length - 1].text)}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.2)]"
+                      disabled={audioLoading}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Volume2 className="w-4 h-4" /> Escuchar Veredicto (Gasta Energía)
+                      {audioLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
+                      {audioLoading ? 'Comprimiendo...' : 'Escuchar Veredicto (Gasta Energía)'}
                     </button>
                   </div>
                 )}
