@@ -3,7 +3,7 @@ import {
   Search, AlertTriangle, CheckCircle, Clock, TrendingUp, TrendingDown,
   Activity, Brain, Info, Loader2, MessageSquare, Send, X, User,
   Copy, Share2, History, Zap, Volume2, VolumeX, ArrowLeftRight,
-  Briefcase, ShieldAlert, Settings, Coins, Wallet, Instagram, Twitter, Flame, Trophy, ClipboardPaste
+  Briefcase, ShieldAlert, Settings, Coins, Wallet, Instagram, Twitter, Flame, Trophy, ClipboardPaste, Cpu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
@@ -178,11 +178,70 @@ function WhaleBrainApp() {
   const [degenMode, setDegenMode] = useState(false);
   const [quickMode, setQuickMode] = useState(false);
   const [rataMode, setRataMode] = useState(false);
+  const [showModes, setShowModes] = useState(false);
+  const [tgUser, setTgUser] = useState<any>(null);
+  const [credits, setCredits] = useState<number | null>(null);
+
+  // Saludo Automático
+  useEffect(() => {
+    if (!tgUser?.first_name) return;
+    const timeout = setTimeout(() => {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const lastGreeting = localStorage.getItem('whale_last_greeting');
+      const inauguralDone = localStorage.getItem('whale_inaugural_greeting');
+
+      if (!inauguralDone) {
+        localStorage.setItem('whale_inaugural_greeting', 'done');
+        localStorage.setItem('whale_last_greeting', todayStr);
+        const greetingMsg = `¡Bienvenido soldado ${tgUser.first_name}! Soy Neural Guru, tu ballena de cabecera. Esta app es el búnker definitivo de LCA, un loco demente experto en DEFI, cripto e IA que juntó todas las herramientas acá para que revientes el mercado. Preguntame lo que quieras.`;
+        setChatMessages(prev => prev.length === 0 ? [{ role: 'model', text: greetingMsg }] : prev);
+        setShowChat(true);
+      } else if (lastGreeting !== todayStr) {
+        localStorage.setItem('whale_last_greeting', todayStr);
+        const hour = new Date().getHours();
+        let timeOfDay = "buen día";
+        if (hour >= 12 && hour < 20) timeOfDay = "buenas tardes";
+        if (hour >= 20) timeOfDay = "buenas noches";
+
+        const greetingMsg = `¡${timeOfDay} soldado ${tgUser.first_name}! Acá está la ballena lista para otra sesión de scaneo en la blockchain. ¿Qué andamos buscando hoy?`;
+        setChatMessages(prev => prev.length === 0 ? [{ role: 'model', text: greetingMsg }] : prev);
+        setShowChat(true);
+      }
+    }, 1500);
+    return () => clearTimeout(timeout);
+  }, [tgUser]);
   const [activeTab, setActiveTab] = useState<'tokens' | 'contracts' | 'wallets' | 'compare' | 'portfolio' | 'academy' | 'airdrops'>('tokens');
   const [compareAddresses, setCompareAddresses] = useState({ addr1: '', addr2: '' });
   const [compareResults, setCompareResults] = useState<{ res1: AnalysisResult | null, res2: AnalysisResult | null }>({ res1: null, res2: null });
-  const [tgUser, setTgUser] = useState<any>(null);
-  const [credits, setCredits] = useState<number | null>(null);
+
+  // Saludo Automático
+  useEffect(() => {
+    if (!tgUser?.first_name) return;
+    const timeout = setTimeout(() => {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const lastGreeting = localStorage.getItem('whale_last_greeting');
+      const inauguralDone = localStorage.getItem('whale_inaugural_greeting');
+
+      if (!inauguralDone) {
+        localStorage.setItem('whale_inaugural_greeting', 'done');
+        localStorage.setItem('whale_last_greeting', todayStr);
+        const greetingMsg = `¡Bienvenido soldado ${tgUser.first_name}! Soy Neural Guru, tu ballena de cabecera. Esta app es el búnker definitivo de LCA, un loco demente experto en DEFI, cripto e IA que juntó todas las herramientas acá para que revientes el mercado. Preguntame lo que quieras.`;
+        setChatMessages(prev => prev.length === 0 ? [{ role: 'model', text: greetingMsg }] : prev);
+        setShowChat(true);
+      } else if (lastGreeting !== todayStr) {
+        localStorage.setItem('whale_last_greeting', todayStr);
+        const hour = new Date().getHours();
+        let timeOfDay = "buen día";
+        if (hour >= 12 && hour < 20) timeOfDay = "buenas tardes";
+        if (hour >= 20) timeOfDay = "buenas noches";
+
+        const greetingMsg = `¡${timeOfDay} soldado ${tgUser.first_name}! Acá está la ballena lista para otra sesión de scaneo en la blockchain. ¿Qué andamos buscando hoy?`;
+        setChatMessages(prev => prev.length === 0 ? [{ role: 'model', text: greetingMsg }] : prev);
+        setShowChat(true);
+      }
+    }, 1500);
+    return () => clearTimeout(timeout);
+  }, [tgUser]);
 
   // Telegram Mini App Initialization
   useEffect(() => {
@@ -434,6 +493,7 @@ function WhaleBrainApp() {
     // Mobile iOS: Desbloquear stream de audio sincrónicamente con el tap del usuario
     if (soundEnabled && audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.src = "data:audio/mp3;base64,"; // Limpiar buffer viejo
       audioRef.current.play().catch(() => { });
     }
 
@@ -567,6 +627,7 @@ function WhaleBrainApp() {
     // Mobile iOS: Frenar audio anterior y desbloquear el contexto de audio sincrónicamente en este click originario
     if (soundEnabled && audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.src = "data:audio/mp3;base64,"; // Limpiar buffer viejo
       audioRef.current.play().catch(() => { });
     }
 
@@ -864,53 +925,74 @@ function WhaleBrainApp() {
         )}
 
         <button
-          onClick={() => {
-            triggerHaptic('heavy');
-            setShowChat(true);
-            const antiRoboMsg = "🚨 **ESCÁNER ANTI-ROBO INICIADO.** \n\nSubime ACÁ MISMO (con el iconito verde oscuro de imagen que tenés a la izquierda del texto) la **captura de pantalla** de la aprobación de MetaMask, Phantom o de la Web turbia que estás por firmar.\n\nTe hago una radiografía y te digo si es un Honeypot, un Scam, o si vas a terminar perdiendo la casa.";
-            setChatMessages(prev => prev.some(m => m.text.includes("ESCÁNER ANTI-ROBO")) ? prev : [...prev, { text: antiRoboMsg, role: 'model' }]);
-          }}
-          className="flex items-center gap-2 px-4 py-2 rounded-full border bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.5)] transition-all hover:bg-orange-500/30 font-black animate-pulse"
+          onClick={() => setShowModes(!showModes)}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${showModes ? 'bg-zinc-800 border-cyan-500 text-cyan-400' : 'bg-zinc-900/80 border-cyan-500/30 text-cyan-500 hover:bg-zinc-800/80'} shadow-[0_0_15px_rgba(6,182,212,0.2)] backdrop-blur-md scale-100 hover:scale-105 active:scale-95`}
         >
-          <ShieldAlert className="w-4 h-4" />
-          <span className="text-xs uppercase tracking-widest hidden sm:inline">Anti Robo</span>
-        </button>
-        <button
-          onClick={() => setRataMode(!rataMode)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${rataMode
-            ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.5)]'
-            : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
-            }`}
-        >
-          <Coins className={`w-4 h-4 ${rataMode ? 'animate-bounce' : ''}`} />
-          <span className="text-xs font-black uppercase tracking-widest">Modo Rata {rataMode ? 'ON' : 'OFF'}</span>
+          <Cpu className={`w-5 h-5 ${showModes ? 'animate-pulse' : ''}`} />
+          <span className="text-xs font-black uppercase tracking-widest">{showModes ? 'CERRAR' : 'MODOS'}</span>
         </button>
 
-        <button
-          onClick={() => {
-            const nextState = !degenMode;
-            setDegenMode(nextState);
-            if (nextState) setActiveTab('contracts');
-          }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${degenMode
-            ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]'
-            : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
-            }`}
-        >
-          <Activity className={`w-4 h-4 ${degenMode ? 'animate-pulse' : ''}`} />
-          <span className="text-xs font-black uppercase tracking-widest">Modo Degen {degenMode ? 'ON' : 'OFF'}</span>
-        </button>
+        <AnimatePresence>
+          {showModes && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.9 }}
+              className="flex flex-col gap-3 items-end mt-1 origin-top-right relative z-50 bg-black/40 p-4 rounded-3xl border border-zinc-500/20 backdrop-blur-xl shadow-2xl"
+            >
+              <button
+                onClick={() => {
+                  triggerHaptic('heavy');
+                  setShowChat(true);
+                  const antiRoboMsg = "🚨 **ESCÁNER ANTI-ROBO INICIADO.** \n\nSubime ACÁ MISMO (con el iconito verde oscuro de imagen que tenés a la izquierda del texto) la **captura de pantalla** de la aprobación de MetaMask, Phantom o de la Web turbia que estás por firmar.\n\nTe hago una radiografía y te digo si es un Honeypot, un Scam, o si vas a terminar perdiendo la casa.";
+                  setChatMessages(prev => prev.some(m => m.text.includes("ESCÁNER ANTI-ROBO")) ? prev : [...prev, { text: antiRoboMsg, role: 'model' }]);
+                  setShowModes(false);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.5)] transition-all hover:bg-orange-500/30 font-black animate-pulse"
+              >
+                <ShieldAlert className="w-4 h-4" />
+                <span className="text-xs uppercase tracking-widest sm:inline">Anti Robo</span>
+              </button>
 
-        <button
-          onClick={() => setQuickMode(!quickMode)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${quickMode
-            ? 'bg-blue-500/20 border-blue-500 text-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.5)]'
-            : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
-            }`}
-        >
-          <Zap className={`w-4 h-4 ${quickMode ? 'animate-bounce' : ''}`} />
-          <span className="text-xs font-black uppercase tracking-widest">Modo Rápido {quickMode ? 'ON' : 'OFF'}</span>
-        </button>
+              <button
+                onClick={() => setRataMode(!rataMode)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${rataMode
+                  ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.5)]'
+                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                  }`}
+              >
+                <Coins className={`w-4 h-4 ${rataMode ? 'animate-bounce' : ''}`} />
+                <span className="text-xs font-black uppercase tracking-widest">Modo Rata {rataMode ? 'ON' : 'OFF'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  const nextState = !degenMode;
+                  setDegenMode(nextState);
+                  if (nextState) setActiveTab('contracts');
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${degenMode
+                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]'
+                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                  }`}
+              >
+                <Activity className={`w-4 h-4 ${degenMode ? 'animate-pulse' : ''}`} />
+                <span className="text-xs font-black uppercase tracking-widest">Modo Degen {degenMode ? 'ON' : 'OFF'}</span>
+              </button>
+
+              <button
+                onClick={() => setQuickMode(!quickMode)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${quickMode
+                  ? 'bg-blue-500/20 border-blue-500 text-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.5)]'
+                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                  }`}
+              >
+                <Zap className={`w-4 h-4 ${quickMode ? 'animate-bounce' : ''}`} />
+                <span className="text-xs font-black uppercase tracking-widest">Rápido {quickMode ? 'ON' : 'OFF'}</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Background Glow */}
