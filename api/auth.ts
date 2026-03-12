@@ -40,8 +40,8 @@ export default async function handler(req: Request) {
         const todayDateStr = new Date().toISOString().split('T')[0];
 
         // ADMIN VIP CHECK
-        const adminIDs = [1547744406, 6356150901]; // LCACRYPTOACADEMY, nico
-        const adminUsernames = ['invitia_studio', 'lcacryptoacademy']; // Fallback por username si el ID no matchea
+        const adminIDs = [1547744406, 6356150901, 8687079309]; // LCACRYPTOACADEMY, nico, invitia
+        const adminUsernames = ['invitia_studio', 'lcacryptoacademy', 'invitiaoficial']; // Fallback por username si el ID no matchea
 
         const isAdmin = adminIDs.includes(Number(telegram_id)) || adminUsernames.includes(username.toLowerCase());
         const BASE_CREDITS = isAdmin ? 99999 : 15;
