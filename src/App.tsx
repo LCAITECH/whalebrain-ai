@@ -1055,11 +1055,27 @@ INSTRUCCIONES CLAVE:
 
         <button
           onClick={() => { playClick(); setShowModes(!showModes); }}
-          className={`relative flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${showModes ? 'bg-zinc-800 border-cyan-500 text-cyan-400' : 'bg-zinc-900/80 border-cyan-500/30 text-cyan-500 hover:bg-zinc-800/80'} shadow-[0_0_15px_rgba(6,182,212,0.6)] backdrop-blur-md scale-100 hover:scale-105 active:scale-95 ${!showModes && !traderMode && !degenMode && !casinoMode && !rataMode ? 'animate-pulse' : ''}`}
+          className={`relative flex items-center gap-2 px-4 py-2 rounded-full border transition-all shadow-lg backdrop-blur-md scale-100 hover:scale-105 active:scale-95 ${showModes ? 'bg-zinc-800 border-zinc-500 text-zinc-300' :
+              traderMode ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.6)]' :
+                degenMode ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.6)]' :
+                  casinoMode ? 'bg-red-500/20 border-red-500 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-pulse' :
+                    rataMode ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.6)]' :
+                      'bg-zinc-900/80 border-cyan-500/30 text-cyan-500 hover:bg-cyan-500/10 hover:border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.6)] animate-[pulse_2s_ease-in-out_infinite]'
+            }`}
         >
-          <Cpu className={`w-5 h-5 ${showModes ? 'animate-pulse' : ''}`} />
-          <span className="text-xs font-black uppercase tracking-widest">{showModes ? 'CERRAR' : 'MODOS'}</span>
-          {!showModes && (
+          {traderMode && !showModes ? <TrendingUp className="w-5 h-5 animate-pulse" /> :
+            degenMode && !showModes ? <Activity className="w-5 h-5 animate-bounce" /> :
+              casinoMode && !showModes ? <Flame className="w-5 h-5 animate-pulse" /> :
+                rataMode && !showModes ? <Coins className="w-5 h-5 animate-bounce" /> :
+                  <Cpu className={`w-5 h-5 ${showModes ? 'animate-pulse text-zinc-400' : ''}`} />}
+          <span className="text-xs font-black uppercase tracking-widest">
+            {showModes ? 'CERRAR' :
+              traderMode ? 'TRADER' :
+                degenMode ? 'DEGEN' :
+                  casinoMode ? 'CASINO' :
+                    rataMode ? 'RATA' : 'MODOS'}
+          </span>
+          {!showModes && !traderMode && !degenMode && !casinoMode && !rataMode && (
             <span className="absolute -top-3 -left-3 bg-red-500 border border-red-400 text-white text-[9px] font-black px-2 py-0.5 rounded-full animate-bounce shadow-[0_0_10px_rgba(239,68,68,0.8)] pointer-events-none">
               ¡MÍRAME!
             </span>
@@ -1079,11 +1095,11 @@ INSTRUCCIONES CLAVE:
                   playClick();
                   triggerHaptic('heavy');
                   setShowChat(true);
-                  const antiRoboMsg = "🚨 **ESCÁNER ANTI-ROBO INICIADO.** \n\nSubime ACÁ MISMO (con el iconito verde oscuro de imagen que tenés a la izquierda del texto) la **captura de pantalla** de la aprobación de MetaMask, Phantom o de la Web turbia que estás por firmar.\n\nTe hago una radiografía y te digo si es un Honeypot, un Scam, o si vas a terminar perdiendo la casa.";
+                  const antiRoboMsg = "🚨 **ESCÁNER ANTI-ROBO INICIADO.** \\n\\nSubime ACÁ MISMO (con el iconito verde oscuro de imagen que tenés a la izquierda del texto) la **captura de pantalla** de la aprobación de MetaMask, Phantom o de la Web turbia que estás por firmar.\\n\\nTe hago una radiografía y te digo si es un Honeypot, un Scam, o si vas a terminar perdiendo la casa.";
                   setChatMessages(prev => prev.some(m => m.text.includes("ESCÁNER ANTI-ROBO")) ? prev : [...prev, { text: antiRoboMsg, role: 'model' }]);
                   setShowModes(false);
                 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-full border bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.5)] transition-all hover:bg-orange-500/30 font-black animate-pulse"
+                className="flex items-center gap-2 px-4 py-2 rounded-full border bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_30px_rgba(249,115,22,0.8)] hover:shadow-[0_0_50px_rgba(249,115,22,1)] transition-all hover:bg-orange-500/40 font-black animate-pulse"
               >
                 <ShieldAlert className="w-4 h-4" />
                 <span className="text-xs uppercase tracking-widest sm:inline">Anti Robo</span>
@@ -1092,45 +1108,45 @@ INSTRUCCIONES CLAVE:
               <button
                 onClick={() => { if (!traderMode) playClick(); setTraderMode(!traderMode); setDegenMode(false); setRataMode(false); setCasinoMode(false); if (!traderMode) setActiveTab('tokens'); setShowModes(false); triggerHaptic('light'); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${traderMode
-                  ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.5)]'
-                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                  ? 'bg-indigo-500/30 border-indigo-500 text-indigo-300 shadow-[0_0_30px_rgba(99,102,241,0.8)] scale-105'
+                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-indigo-500/50 hover:text-indigo-400 hover:shadow-[0_0_15px_rgba(99,102,241,0.4)]'
                   }`}
               >
-                <TrendingUp className={`w-4 h-4 ${traderMode ? 'animate-pulse' : ''}`} />
-                <span className="text-xs font-black uppercase tracking-widest">TRADER {traderMode ? 'ON' : ''}</span>
+                <TrendingUp className={`w-4 h-4 ${traderMode ? 'animate-pulse text-indigo-200' : ''}`} />
+                <span className="text-xs font-black uppercase tracking-widest text-shadow-sm">TRADER {traderMode ? 'ON' : ''}</span>
               </button>
 
               <button
                 onClick={() => { if (!degenMode) playClick(); setDegenMode(!degenMode); setTraderMode(false); setRataMode(false); setCasinoMode(false); if (!degenMode) setActiveTab('contracts'); setShowModes(false); triggerHaptic('light'); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${degenMode
-                  ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.5)]'
-                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                  ? 'bg-orange-500/30 border-orange-500 text-orange-300 shadow-[0_0_30px_rgba(249,115,22,0.8)] scale-105'
+                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-orange-500/50 hover:text-orange-400 hover:shadow-[0_0_15px_rgba(249,115,22,0.4)]'
                   }`}
               >
-                <Activity className={`w-4 h-4 ${degenMode ? 'animate-bounce' : ''}`} />
-                <span className="text-xs font-black uppercase tracking-widest">DEGEN {degenMode ? 'ON' : ''}</span>
+                <Activity className={`w-4 h-4 ${degenMode ? 'animate-bounce text-orange-200' : ''}`} />
+                <span className="text-xs font-black uppercase tracking-widest text-shadow-sm">DEGEN {degenMode ? 'ON' : ''}</span>
               </button>
 
               <button
                 onClick={() => { if (!casinoMode) playSound('casino_machine.mp3'); else playClick(); setCasinoMode(!casinoMode); setTraderMode(false); setDegenMode(false); setRataMode(false); if (!casinoMode) setActiveTab('tokens'); setShowModes(false); triggerHaptic('light'); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${casinoMode
-                  ? 'bg-red-500/20 border-red-500 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]'
-                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                  ? 'bg-red-500/30 border-red-500 text-red-300 shadow-[0_0_30px_rgba(239,68,68,0.8)] scale-105'
+                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-red-500/50 hover:text-red-400 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]'
                   }`}
               >
-                <Flame className={`w-4 h-4 ${casinoMode ? 'animate-pulse' : ''}`} />
-                <span className="text-xs font-black uppercase tracking-widest">CASINO {casinoMode ? 'ON' : ''}</span>
+                <Flame className={`w-4 h-4 ${casinoMode ? 'animate-pulse text-red-200' : ''}`} />
+                <span className="text-xs font-black uppercase tracking-widest text-shadow-sm">CASINO {casinoMode ? 'ON' : ''}</span>
               </button>
 
               <button
                 onClick={() => { if (!rataMode) playClick(); setRataMode(!rataMode); setTraderMode(false); setDegenMode(false); setCasinoMode(false); if (!rataMode) setActiveTab('airdrops'); setShowModes(false); triggerHaptic('light'); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${rataMode
-                  ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.5)]'
-                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                  ? 'bg-yellow-500/30 border-yellow-500 text-yellow-300 shadow-[0_0_30px_rgba(234,179,8,0.8)] scale-105'
+                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-yellow-500/50 hover:text-yellow-400 hover:shadow-[0_0_15px_rgba(234,179,8,0.4)]'
                   }`}
               >
-                <Coins className={`w-4 h-4 ${rataMode ? 'animate-bounce' : ''}`} />
-                <span className="text-xs font-black uppercase tracking-widest">RATA {rataMode ? 'ON' : ''}</span>
+                <Coins className={`w-4 h-4 ${rataMode ? 'animate-bounce text-yellow-200' : ''}`} />
+                <span className="text-xs font-black uppercase tracking-widest text-shadow-sm">RATA {rataMode ? 'ON' : ''}</span>
               </button>
             </motion.div>
           )}
