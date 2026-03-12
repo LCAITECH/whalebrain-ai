@@ -48,9 +48,9 @@ export const CalculatorModal: React.FC<CalculatorModalProps> = ({ coinName, coin
     }
 
     const formatCurrency = (val: number) => {
-        if (val < 0.0001) return val.toFixed(8);
-        if (val < 1) return val.toFixed(4);
-        return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (val < 0.0001) return val.toLocaleString('en-US', { minimumFractionDigits: 8, maximumFractionDigits: 8 });
+        if (val < 1) return val.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+        return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
     return (
@@ -140,7 +140,7 @@ export const CalculatorModal: React.FC<CalculatorModalProps> = ({ coinName, coin
                         <div className="flex justify-between items-center gap-2">
                             <span className="text-xs sm:text-sm font-bold text-zinc-400 shrink-0">Rentabilidad (ROE)</span>
                             <span className={`text-base sm:text-lg font-black break-all text-right ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                {pnl > 0 ? '+' : ''}{roe.toFixed(2)}%
+                                {pnl > 0 ? '+' : ''}{roe.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%
                             </span>
                         </div>
 
