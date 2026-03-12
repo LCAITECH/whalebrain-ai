@@ -904,8 +904,9 @@ INSTRUCCIONES CLAVE:
           >
             <style>{`
               @keyframes roulette-flash {
-                0%, 100% { box-shadow: inset 0 0 300px rgba(239, 68, 68, 0.4); border-color: rgba(239, 68, 68, 0.8); }
-                50% { box-shadow: inset 0 0 300px rgba(0, 0, 0, 0.8); border-color: rgba(20, 20, 20, 0.9); }
+                0%, 100% { box-shadow: inset 0 0 300px rgba(9, 9, 11, 0.4); border-color: rgba(9, 9, 11, 0.8); }
+                33% { box-shadow: inset 0 0 300px rgba(239, 68, 68, 0.8); border-color: rgba(239, 68, 68, 1); }
+                66% { box-shadow: inset 0 0 300px rgba(34, 197, 94, 0.6); border-color: rgba(34, 197, 94, 0.8); }
               }
             `}</style>
             <div className="absolute inset-0 border-[12px] md:border-[24px]" style={{ animation: 'roulette-flash 1s infinite' }} />
@@ -1056,11 +1057,11 @@ INSTRUCCIONES CLAVE:
         <button
           onClick={() => { playClick(); setShowModes(!showModes); }}
           className={`relative flex items-center gap-2 px-4 py-2 rounded-full border transition-all shadow-lg backdrop-blur-md scale-100 hover:scale-105 active:scale-95 ${showModes ? 'bg-zinc-800 border-zinc-500 text-zinc-300' :
-              traderMode ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.6)]' :
-                degenMode ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.6)]' :
-                  casinoMode ? 'bg-red-500/20 border-red-500 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-pulse' :
-                    rataMode ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.6)]' :
-                      'bg-zinc-900/80 border-cyan-500/30 text-cyan-500 hover:bg-cyan-500/10 hover:border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.6)] animate-[pulse_2s_ease-in-out_infinite]'
+            traderMode ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.6)]' :
+              degenMode ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.6)]' :
+                casinoMode ? 'bg-red-500/20 border-red-500 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-pulse' :
+                  rataMode ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.6)]' :
+                    'bg-zinc-900/80 border-cyan-500/30 text-cyan-500 hover:bg-cyan-500/10 hover:border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.6)] animate-[pulse_2s_ease-in-out_infinite]'
             }`}
         >
           {traderMode && !showModes ? <TrendingUp className="w-5 h-5 animate-pulse" /> :
@@ -1095,7 +1096,7 @@ INSTRUCCIONES CLAVE:
                   playClick();
                   triggerHaptic('heavy');
                   setShowChat(true);
-                  const antiRoboMsg = "🚨 **ESCÁNER ANTI-ROBO INICIADO.** \\n\\nSubime ACÁ MISMO (con el iconito verde oscuro de imagen que tenés a la izquierda del texto) la **captura de pantalla** de la aprobación de MetaMask, Phantom o de la Web turbia que estás por firmar.\\n\\nTe hago una radiografía y te digo si es un Honeypot, un Scam, o si vas a terminar perdiendo la casa.";
+                  const antiRoboMsg = "🚨 **ESCÁNER ANTI-ROBO INICIADO.** \n\nSubime ACÁ MISMO (con el iconito verde oscuro de imagen que tenés a la izquierda del texto) la **captura de pantalla** de la aprobación de MetaMask, Phantom o de la Web turbia que estás por firmar.\n\nTe hago una radiografía y te digo si es un Honeypot, un Scam, o si vas a terminar perdiendo la casa.";
                   setChatMessages(prev => prev.some(m => m.text.includes("ESCÁNER ANTI-ROBO")) ? prev : [...prev, { text: antiRoboMsg, role: 'model' }]);
                   setShowModes(false);
                 }}
@@ -1139,7 +1140,7 @@ INSTRUCCIONES CLAVE:
               </button>
 
               <button
-                onClick={() => { if (!rataMode) playClick(); setRataMode(!rataMode); setTraderMode(false); setDegenMode(false); setCasinoMode(false); if (!rataMode) setActiveTab('airdrops'); setShowModes(false); triggerHaptic('light'); }}
+                onClick={() => { if (!rataMode) playSound('modo_rata.mp3'); else playClick(); setRataMode(!rataMode); setTraderMode(false); setDegenMode(false); setCasinoMode(false); if (!rataMode) setActiveTab('airdrops'); setShowModes(false); triggerHaptic('light'); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${rataMode
                   ? 'bg-yellow-500/30 border-yellow-500 text-yellow-300 shadow-[0_0_30px_rgba(234,179,8,0.8)] scale-105'
                   : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-yellow-500/50 hover:text-yellow-400 hover:shadow-[0_0_15px_rgba(234,179,8,0.4)]'
@@ -1183,8 +1184,8 @@ INSTRUCCIONES CLAVE:
             animate={{ scale: 1, opacity: 1 }}
             className="relative w-40 h-40 mb-6"
           >
-            <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-2xl animate-pulse" />
-            <div className="relative w-full h-full rounded-full border-4 border-emerald-500 shadow-[0_0_60px_rgba(16,185,129,0.8)] overflow-hidden bg-emerald-950/50">
+            <div className={`absolute inset-0 rounded-full blur-2xl animate-pulse ${casinoMode ? 'bg-red-500/20' : 'bg-emerald-500/20'}`} />
+            <div className={`relative w-full h-full rounded-full border-4 overflow-hidden ${casinoMode ? 'border-red-500 shadow-[0_0_60px_rgba(239,68,68,0.8)] bg-red-950/50' : 'border-emerald-500 shadow-[0_0_60px_rgba(16,185,129,0.8)] bg-emerald-950/50'}`}>
               <img
                 src={WHALE_IMAGE}
                 alt="WhaleBrain AI"
@@ -1198,41 +1199,41 @@ INSTRUCCIONES CLAVE:
               />
             </div>
             <div className="absolute -bottom-2 -right-2 bg-zinc-900 p-3 rounded-2xl border border-zinc-800 shadow-xl">
-              <Brain className="w-8 h-8 text-emerald-400" />
+              <Brain className={`w-8 h-8 ${casinoMode ? 'text-red-400' : 'text-emerald-400'}`} />
             </div>
           </motion.div>
           {tgUser && (
-            <div className="flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 font-black uppercase text-[10px] rounded-full mx-auto mb-4 w-fit shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              🎯 Operando Alpha como @{tgUser.username || tgUser.first_name}
+            <div className={`flex items-center gap-2 px-4 py-1.5 border font-black uppercase text-[10px] rounded-full mx-auto mb-4 w-fit shadow-[0_0_15px_rgba(59,130,246,0.2)] ${casinoMode ? 'bg-red-500/10 border-red-500/20 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'bg-blue-500/10 border-blue-500/20 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]'}`}>
+              <div className={`w-2 h-2 rounded-full animate-pulse ${casinoMode ? 'bg-red-500' : 'bg-blue-500'}`} />
+              🎯 Operando {casinoMode ? 'Casino' : 'Alpha'} como @{tgUser.username || tgUser.first_name}
             </div>
           )}
-          <h1 className={`text-4xl md:text-6xl font-black tracking-tight mb-2 bg-gradient-to-r from-white via-emerald-400 to-blue-500 bg-clip-text text-transparent uppercase italic transition-all duration-500 ${degenMode ? 'drop-shadow-[0_0_15px_rgba(16,185,129,0.8)] scale-105' : ''}`}>
-            TRADE LIKE A WHALE
+          <h1 className={`text-4xl md:text-6xl font-black tracking-tight mb-2 bg-clip-text text-transparent uppercase italic transition-all duration-500 ${casinoMode ? 'bg-gradient-to-r from-white via-red-500 to-orange-500' : 'bg-gradient-to-r from-white via-emerald-400 to-blue-500'} ${degenMode ? 'drop-shadow-[0_0_15px_rgba(16,185,129,0.8)] scale-105' : ''}`}>
+            {casinoMode ? 'TRADE LIKE A DEGEN' : 'TRADE LIKE A WHALE'}
           </h1>
-          <p className="text-emerald-400 text-xl font-black uppercase tracking-widest mb-2 shadow-emerald-500/50 drop-shadow-md">
-            Stop being the exit liquidity.
+          <p className={`text-xl font-black uppercase tracking-widest mb-2 drop-shadow-md ${casinoMode ? 'text-red-400 shadow-red-500/50' : 'text-emerald-400 shadow-emerald-500/50'}`}>
+            {casinoMode ? 'Poné todo al rojo.' : 'Stop being the exit liquidity.'}
           </p>
           <p className="text-zinc-500 text-sm max-w-md font-medium uppercase tracking-wider">
-            La IA que trackea el Smart Money antes del pump. Operá con ventaja injusta o seguí perdiendo plata.
+            {casinoMode ? 'La ruleta on-chain donde las ballenas apuestan. Entrá o mirala de afuera.' : 'La IA que trackea el Smart Money antes del pump. Operá con ventaja injusta o seguí perdiendo plata.'}
           </p>
         </header>
 
         {/* Proof of Alpha Banner */}
-        <div className="mb-8 w-full max-w-3xl mx-auto overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500/20 via-zinc-900 to-emerald-500/20 border justify-center border-emerald-500/30 py-3 px-4 shadow-[0_0_20px_rgba(16,185,129,0.15)] flex items-center gap-3">
+        <div className={`mb-8 w-full max-w-3xl mx-auto overflow-hidden rounded-2xl border py-3 px-4 flex items-center gap-3 ${casinoMode ? 'bg-gradient-to-r from-red-500/20 via-zinc-900 to-red-500/20 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.15)]' : 'bg-gradient-to-r from-emerald-500/20 via-zinc-900 to-emerald-500/20 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.15)]'}`}>
           <span className="relative flex h-3 w-3 shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${casinoMode ? 'bg-red-400' : 'bg-emerald-400'}`}></span>
+            <span className={`relative inline-flex rounded-full h-3 w-3 ${casinoMode ? 'bg-red-500' : 'bg-emerald-500'}`}></span>
           </span>
-          <div className="text-[12px] font-black uppercase tracking-widest text-emerald-400 flex-1 flex items-center overflow-hidden whitespace-nowrap">
+          <div className={`text-[12px] font-black uppercase tracking-widest flex-1 flex items-center overflow-hidden whitespace-nowrap ${casinoMode ? 'text-red-400' : 'text-emerald-400'}`}>
             <motion.div
               animate={{ x: ["100%", "-100%"] }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
               className="flex gap-12"
             >
-              <span>✅ PROOF OF ALPHA: Nuestra IA detectó $PEPE2.0 4hs antes del pump (+3500%)</span>
-              <span>🔥 SMART MONEY: 0x8aF... acaba de acumular $4M en $PNUT antes del listado en Binance (+1200%)</span>
-              <span>⚠️ ALERTA RUGPULL: Detectamos honeypot oculto en $SHIBAI salvando $500k de la comunidad</span>
+              <span>{casinoMode ? '🎰 JACKPOT: 0x8aF... acaba de meter un x100 en $PNUT (Apostó $4M)' : '✅ PROOF OF ALPHA: Nuestra IA detectó $PEPE2.0 4hs antes del pump (+3500%)'}</span>
+              <span>{casinoMode ? '🔥 HIGH ROLLER: La billetera de jake.eth quemó 50 ETH en un honeypot' : '🔥 SMART MONEY: 0x8aF... acaba de acumular $4M en $PNUT antes del listado en Binance (+1200%)'}</span>
+              <span>{casinoMode ? '⚠️ RUGPULL ALERT: El casino cerró las puertas de $SHIBAI, $500k liquidados' : '⚠️ ALERTA RUGPULL: Detectamos honeypot oculto en $SHIBAI salvando $500k de la comunidad'}</span>
             </motion.div>
           </div>
         </div>
@@ -1430,7 +1431,7 @@ INSTRUCCIONES CLAVE:
                           { name: 'Monad', desc: 'Testnet activa. Farmeo rápido sin riesgo en la L1 paralela.', tag: 'L1 Hot', link: 'https://testnet.monad.xyz', color: 'bg-indigo-500' },
                           { name: 'Linea', desc: 'Campaña LXP en marcha. Interactuá con dApps.', tag: 'L2 Hot', link: 'https://linea.build', color: 'bg-cyan-500' },
                           { name: 'AAVE (Incentivos)', desc: 'Mercado Lending pagando recompensas extra (Merit) en red Base.', tag: 'Lending', link: 'https://app.aave.com', color: 'bg-violet-500' },
-                          { name: 'Pixels ($PIXEL)', desc: 'Juego blockchain top en la red Ronin. Excelente economía de gaming.', tag: 'Gaming', link: 'https://play.pixels.xyz', color: 'bg-emerald-500' },
+                          { name: 'Pixel Dungeons', desc: 'Farmea $PIXEL en la red de Ronin y acumula recompensas en este frenético juego blockchain.', tag: 'Gaming', link: 'https://pixeldungeons.xyz/', color: 'bg-emerald-500' },
                           { name: 'Ecosistema TON', desc: 'Mini-apps de Telegram. Tap-to-earn y DeFi nativo con bajo gas.', tag: 'SocialFi', link: 'https://ton.org', color: 'bg-sky-500' }
                         ].map((drop, idx) => (
                           <a key={idx} href={drop.link} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all group">
@@ -1683,22 +1684,74 @@ INSTRUCCIONES CLAVE:
           {/* Quick Trending Coins / Airdrop Pills row */}
           {activeTab === 'tokens' && !query && (
             <div className="mt-4 px-2 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none w-full">
-              <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest whitespace-nowrap hidden sm:block">HOT 🔥</span>
-              {[
-                { token: 'PENGU', bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' },
-                { token: 'TRUMP', bg: 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20' },
-                { token: 'CHIPPY', bg: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/20' },
-                { token: 'GOAT', bg: 'bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500/20' },
-                { token: 'MOODENG', bg: 'bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20' }
-              ].map((item) => (
-                <button
-                  key={item.token}
-                  onClick={() => { setQuery(item.token); handleSearch(item.token); }}
-                  className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border transition-all active:scale-95 ${item.bg}`}
-                >
-                  ${item.token}
-                </button>
-              ))}
+              {casinoMode ? (
+                <>
+                  <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest whitespace-nowrap hidden sm:block">🎰 TOP MEMES</span>
+                  {[
+                    { token: 'PEPE', bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.3)]' },
+                    { token: 'WIF', bg: 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20 shadow-[0_0_10px_rgba(244,63,94,0.3)]' },
+                    { token: 'BONK', bg: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.3)]' },
+                    { token: 'MOG', bg: 'bg-orange-500/10 text-orange-400 border-orange-500/30 hover:bg-orange-500/20 shadow-[0_0_10px_rgba(249,115,22,0.3)]' },
+                    { token: 'BOME', bg: 'bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.3)]' },
+                    { token: 'POPCAT', bg: 'bg-yellow-600/10 text-yellow-500 border-yellow-600/30 hover:bg-yellow-600/20 shadow-[0_0_10px_rgba(202,138,4,0.3)]' },
+                    { token: 'BRETT', bg: 'bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.3)]' },
+                    { token: 'TURBO', bg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/20 shadow-[0_0_10px_rgba(6,182,212,0.3)]' },
+                    { token: 'FLOKI', bg: 'bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.3)]' },
+                    { token: 'SHIB', bg: 'bg-stone-500/10 text-stone-400 border-stone-500/30 hover:bg-stone-500/20 shadow-[0_0_10px_rgba(120,113,108,0.3)]' }
+                  ].map((item) => (
+                    <button
+                      key={item.token}
+                      onClick={() => { setQuery(item.token); handleSearch(item.token); playSound('casino_machine.mp3'); }}
+                      className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border transition-all active:scale-95 animate-pulse ${item.bg}`}
+                    >
+                      ${item.token}
+                    </button>
+                  ))}
+                </>
+              ) : traderMode ? (
+                <>
+                  <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest whitespace-nowrap hidden sm:block">📰 MACRO</span>
+                  {[
+                    { token: 'BTC', bg: 'bg-orange-500/10 text-orange-400 border-orange-500/30 hover:bg-orange-500/20' },
+                    { token: 'ETH', bg: 'bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20' },
+                    { token: 'SOL', bg: 'bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500/20' },
+                    { token: 'SUI', bg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/20' }
+                  ].map((item) => (
+                    <button
+                      key={item.token}
+                      onClick={() => { setQuery(item.token); handleSearch(item.token); }}
+                      className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border transition-all active:scale-95 ${item.bg}`}
+                    >
+                      ${item.token}
+                    </button>
+                  ))}
+                  <div className="shrink-0 ml-2 pl-4 border-l border-zinc-800 flex items-center gap-2 overflow-hidden w-[200px] md:w-[400px]">
+                    <div className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-ping shrink-0" />
+                    <marquee className="text-[10px] font-mono font-black text-rose-400 uppercase tracking-widest" scrollAmount={4}>
+                      ÚLTIMO MOMENTO: Powell anunciará recorte de tasas de 50bps || Liquidez récord fluye hacia ETFs de Bitcoin || Ethereum layer-2 gas fees tocan mínimo histórico || Grandes fondos acumulando SOL...
+                    </marquee>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest whitespace-nowrap hidden sm:block">HOT 🔥</span>
+                  {[
+                    { token: 'PENGU', bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' },
+                    { token: 'TRUMP', bg: 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20' },
+                    { token: 'CHIPPY', bg: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/20' },
+                    { token: 'GOAT', bg: 'bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500/20' },
+                    { token: 'MOODENG', bg: 'bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20' }
+                  ].map((item) => (
+                    <button
+                      key={item.token}
+                      onClick={() => { setQuery(item.token); handleSearch(item.token); }}
+                      className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border transition-all active:scale-95 ${item.bg}`}
+                    >
+                      ${item.token}
+                    </button>
+                  ))}
+                </>
+              )}
             </div>
           )}
 
