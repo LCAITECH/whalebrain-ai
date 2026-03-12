@@ -3,13 +3,14 @@ import {
   Search, AlertTriangle, CheckCircle, Clock, TrendingUp, TrendingDown,
   Activity, Brain, Info, Loader2, MessageSquare, Send, X, User,
   Copy, Share2, History, Zap, Volume2, VolumeX, ArrowLeftRight,
-  Briefcase, ShieldAlert, Settings, Coins, Wallet, Instagram, Twitter, Flame, Trophy, ClipboardPaste, Cpu
+  Briefcase, ShieldAlert, Settings, Coins, Wallet, Instagram, Twitter, Flame, Trophy, ClipboardPaste, Cpu, Calculator
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
 import { CoinData, SearchResult, AnalysisResult, ChatMessage } from './types';
 import { analyzeCoin, chatWithWhale, summarizeForAudio } from './services/aiService';
+import { CalculatorModal } from './components/CalculatorModal';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
@@ -181,6 +182,7 @@ function WhaleBrainApp() {
   const [showModes, setShowModes] = useState(false);
   const [tgUser, setTgUser] = useState<any>(null);
   const [credits, setCredits] = useState<number | null>(null);
+  const [showCalculator, setShowCalculator] = useState(false);
 
   // Saludo Automático
   useEffect(() => {
@@ -1739,6 +1741,12 @@ function WhaleBrainApp() {
                         <Zap className="w-3 h-3" /> Comprar
                       </button>
                       <button
+                        onClick={() => setShowCalculator(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 border border-indigo-400/50 text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(99,102,241,0.2)]"
+                      >
+                        <Calculator className="w-3 h-3" /> Calculadora
+                      </button>
+                      <button
                         onClick={shareAnalysis}
                         className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs font-bold transition-colors"
                       >
@@ -2297,6 +2305,16 @@ function WhaleBrainApp() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Futuros / Spot Calculator Modal */}
+      {showCalculator && selectedCoin && (
+        <CalculatorModal
+          coinName={selectedCoin.name}
+          coinSymbol={selectedCoin.symbol}
+          currentPrice={selectedCoin.market_data?.current_price?.usd || 0}
+          onClose={() => setShowCalculator(false)}
+        />
+      )}
 
     </div>
   );
