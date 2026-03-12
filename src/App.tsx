@@ -504,11 +504,26 @@ INSTRUCCIONES CLAVE:
       setChatLoading(true);
       setAudioLoading(true);
       
-      const prompt = `[SISTEMA PREMIUM DESBLOQUEADO]: EL USUARIO ACABA DE PAGAR 1 BATERÍA POR ESTO. Eres "Neural Guru", pero para este reporte adopta el rol de un LOCUTOR DE RADIO PROFESIONAL, INSTITUCIONAL Y SERIO. 
-No te burles del usuario. No uses sarcasmo. Da un reporte macroeconómico y cripto del día de forma coherente y objetiva, como si fuera un boletín informativo de primera línea.
-Haz un resumen de lo que está pasando hoy con Bitcoin, Ethereum, y el sentimiento general del mercado.
-Si no tienes noticias en vivo exactas de hoy, da un panorama general de análisis técnico y macro realista sobre inflación, ETFs, liquidez, y tasas de interés.
-EL TEXTO SERÁ LEÍDO POR TTS, RESPONSDE 1 PÁRRAFO UNICAMENTE.`;
+      let realNewsContext = '';
+      try {
+        const newsRes = await fetch('/api/news');
+        if (newsRes.ok) {
+          const newsData = await newsRes.json();
+          if (newsData.news && newsData.news.length > 0) {
+            const headlines = newsData.news.map((n: any, i: number) => `${i+1}. ${n.title} (Fuente: ${n.source})`).join('\n');
+            realNewsContext = `\n\n=== REPORTE DE NOTICIAS DE ÚLTIMA HORA ===\nAquí tienes las noticias reales más frescas de este momento:\n${headlines}\n\n`;
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch real news, proceeding with generic prompt", err);
+      }
+
+      const prompt = `[SISTEMA PREMIUM DESBLOQUEADO]: EL USUARIO ACABA DE PAGAR 1 BATERÍA POR ESTO. Eres "Neural Guru", pero para este reporte adopta el rol de un LOCUTOR DE RADIO FINANCIERO PROFESIONAL, INSTITUCIONAL Y SERIO QUE LEE LAS NOTICIAS. 
+No te burles del usuario. No uses sarcasmo.
+${realNewsContext}
+Da un reporte macroeconómico y cripto del día de forma coherente y objetiva, resumiendo de manera excelente y fluida las NOTICIAS DE ÚLTIMA HORA provistas arriba. Haz que suene a boletín informativo de primera línea (estilo Bloomberg o Reuters).
+Si las noticias están en inglés, tradúcelas y explícalas en español neutro con confianza.
+EL TEXTO SERÁ LEÍDO POR TTS, RESPONDE MÁXIMO 1 o 2 PÁRRAFOS UNICAMENTE Y SIN EMOJIS.`;
 
       const isolatedContext: ChatMessage[] = [{ role: 'user', text: prompt }];
       const responseText = await chatWithWhale(
@@ -2240,19 +2255,21 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONSDE 1 PÁRRAFO UNICAMENTE.`;
                     />
                   </div>
                   
-                  {/* Heatmap Widget (TradingView) */}
-                  <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 overflow-hidden h-[450px] shadow-2xl relative">
+                  {/* Liquidation Heatmap Widget (Coinglass) */}
+                  <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 overflow-hidden h-[550px] shadow-2xl relative">
                     <div className="absolute inset-0 bg-fuchsia-500/5 mix-blend-overlay pointer-events-none" />
                     <div className="flex items-center gap-2 mb-4 text-fuchsia-400 font-black uppercase tracking-widest text-sm relative z-10">
-                      <Activity className="w-4 h-4" /> Live Heatmap del Mercado
+                      <Activity className="w-4 h-4" /> Liquidation Heatmap
                     </div>
-                    <div className="w-full h-full relative z-10 rounded-xl overflow-hidden border border-zinc-800">
+                    <div className="w-full h-full relative z-10 rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900">
                       <iframe 
-                        src="https://s.tradingview.com/embed-widget/crypto-coins-heatmap/?locale=es&colorTheme=dark&hasSymbolTooltip=true&isZoomEnabled=true&hasTopBar=false&isDataSetEnabled=false&blockSize=market_cap_calc&blockColor=change"
+                        src={`https://www.coinglass.com/pro/i/LiquidationHeatMap?symbol=${selectedCoin.symbol.toUpperCase()}`}
                         width="100%"
-                        height="calc(100% - 32px)"
+                        height="100%"
                         frameBorder="0"
                         allowFullScreen
+                        className="w-full h-full object-cover"
+                        style={{ filter: "invert(0) hue-rotate(0deg)" }}
                       />
                     </div>
                   </div>
