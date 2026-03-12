@@ -2255,24 +2255,8 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONDE MÁXIMO 1 o 2 PÁRRAFOS UNICAMENTE Y SIN
                     />
                   </div>
                   
-                  {/* Liquidation Heatmap Widget (Coinglass) */}
-                  <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 overflow-hidden h-[550px] shadow-2xl relative">
-                    <div className="absolute inset-0 bg-fuchsia-500/5 mix-blend-overlay pointer-events-none" />
-                    <div className="flex items-center gap-2 mb-4 text-fuchsia-400 font-black uppercase tracking-widest text-sm relative z-10">
-                      <Activity className="w-4 h-4" /> Liquidation Heatmap
-                    </div>
-                    <div className="w-full h-full relative z-10 rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900">
-                      <iframe 
-                        src={`https://www.coinglass.com/pro/i/LiquidationHeatMap?symbol=${selectedCoin.symbol.toUpperCase()}`}
-                        width="100%"
-                        height="100%"
-                        frameBorder="0"
-                        allowFullScreen
-                        className="w-full h-full object-cover"
-                        style={{ filter: "invert(0) hue-rotate(0deg)" }}
-                      />
-                    </div>
-                  </div>
+                  {/* Publicidad Degen */}
+                  <AdBanner />
                 </>
               )}
 
@@ -2730,8 +2714,127 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONDE MÁXIMO 1 o 2 PÁRRAFOS UNICAMENTE Y SIN
         />
       )}
 
+      {/* News Bubble */}
+      <NewsBubble />
+
     </div>
   );
 }
 
 // V5 FINAL ELEVENLABS FIX - CACHE BUSTER 00:41
+
+const AD_BANNERS = [
+  { img: "https://imagedelivery.net/jU7Xm0tXQp-I6a7Z3Y8qQQ/5e9c0f99-9b93-4a1b-3f41-4566c5d41d00/public", title: "Tradea en BingX con nuestro Link Degen 🔥", url: "https://t.me/NeuralGuruNews" },
+  { img: "https://imagedelivery.net/jU7Xm0tXQp-I6a7Z3Y8qQQ/5e9c0f99-9b93-4a1b-3f41-4566c5d41d00/public", title: "Bitget: 100x Leverage, ¿listo para la liquidez?", url: "https://t.me/NeuralGuruNews" }
+];
+
+function AdBanner() {
+  const [ad, setAd] = useState(AD_BANNERS[0]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAd(AD_BANNERS[Math.floor(Math.random() * AD_BANNERS.length)]);
+    }, 15000); // Rota cada 15 segundos
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <a href={ad.url} target="_blank" rel="noopener noreferrer" className="block w-full bg-zinc-900/60 border border-amber-500/30 rounded-3xl p-4 mt-6 hover:border-amber-400/60 hover:bg-zinc-800/80 transition-all group overflow-hidden relative shadow-lg">
+      <div className="absolute top-0 right-0 bg-amber-500 text-black text-[9px] font-black px-2 py-0.5 rounded-bl-lg uppercase tracking-widest shadow-lg z-10">Sponsor</div>
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      <div className="flex items-center gap-4 relative z-10">
+        <div className="text-3xl drop-shadow-[0_0_10px_rgba(245,158,11,0.5)] group-hover:scale-110 transition-transform">🎰</div>
+        <div className="flex-1">
+          <div className="text-amber-400 font-black text-sm uppercase tracking-wide group-hover:text-amber-300 transition-colors">{ad.title}</div>
+          <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-0.5">Apoyá a Neural Guru usando este link</div>
+        </div>
+        <div className="text-amber-500 group-hover:text-amber-300 transition-colors group-hover:translate-x-1 duration-300">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+        </div>
+      </div>
+    </a>
+  );
+}
+
+function NewsBubble() {
+  const [news, setNews] = useState<{title: string, source: string} | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const checkNews = async () => {
+      const lastDismissed = localStorage.getItem('whale_news_dismissed');
+      if (lastDismissed && Date.now() - parseInt(lastDismissed) < 1000 * 60 * 60 * 2) {
+        // Ignorar si se cerró hace menos de 2 horas
+        return;
+      }
+      
+      try {
+        const res = await fetch('/api/news');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.news && data.news.length > 0) {
+            setNews(data.news[0]);
+            setTimeout(() => setVisible(true), 3000); // Mostrar 3 segundos después del render
+          }
+        }
+      } catch (e) {
+        console.error("Failed fetching news for bubble", e);
+      }
+    };
+    checkNews();
+  }, []);
+
+  if (!visible || !news) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.8, x: -50 }}
+        className="fixed bottom-[110px] left-6 z-[120] max-w-[280px]"
+      >
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative bg-[#020617] border border-cyan-500/30 p-3 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.15)] flex flex-col gap-2">
+            
+            <button 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                setVisible(false); 
+                localStorage.setItem('whale_news_dismissed', Date.now().toString()); 
+              }} 
+              className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-0.5 hover:bg-rose-400 transition-colors shadow-lg z-20"
+            >
+              <X className="w-3 h-3" />
+            </button>
+
+            <a
+              href="https://t.me/NeuralGuruNews"
+              target="_blank"
+              onClick={() => {
+                setVisible(false);
+                localStorage.setItem('whale_news_dismissed', Date.now().toString());
+              }}
+              rel="noopener noreferrer" 
+              className="flex items-start gap-3"
+            >
+              <div className="w-10 h-10 shrink-0 bg-blue-500/20 rounded-lg flex flex-col items-center justify-center border border-blue-500/30 shadow-inner overflow-hidden">
+                <Send className="w-4 h-4 text-blue-400 mb-0.5 mt-1" />
+                <span className="text-[6px] font-black uppercase text-blue-300">Telegram</span>
+              </div>
+              <div className="flex-1 pt-0.5">
+                <div className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest flex items-center gap-1 mb-1">
+                  <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse" />
+                  Neural Guru Alert
+                </div>
+                <div className="text-xs text-white font-medium leading-tight line-clamp-2 mix-blend-screen shadow-black">
+                  "{news.title}"
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
