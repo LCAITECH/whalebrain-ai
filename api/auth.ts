@@ -9,10 +9,8 @@ export default async function handler(req: Request) {
         const body = await req.json();
         const { tgUser } = body;
 
-        // Si entra por la Web normal (sin Telegram), le damos un pase libre temporal o bloqueamos.
-        // Vamos a darle 5 creditos locales para que pueda testear la web sin romperla.
         if (!tgUser || !tgUser.id) {
-            return new Response(JSON.stringify({ credits: 5 }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+            return new Response(JSON.stringify({ credits: 15 }), { status: 200, headers: { 'Content-Type': 'application/json' } });
         }
 
         const { id: telegram_id, username = 'Anon', first_name = '' } = tgUser;
@@ -24,7 +22,7 @@ export default async function handler(req: Request) {
         // Si faltan keys (dev local) mockeamos para no romper el front
         if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
             console.error('Missing Supabase variables');
-            return new Response(JSON.stringify({ telegram_id, credits: 5, warning: 'NO_SUPABASE_KEYS' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+            return new Response(JSON.stringify({ telegram_id, credits: 15, warning: 'NO_SUPABASE_KEYS' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
         }
 
         // 1. Buscar usuario
@@ -41,12 +39,19 @@ export default async function handler(req: Request) {
         // Helper: Formato YYYY-MM-DD
         const todayDateStr = new Date().toISOString().split('T')[0];
 
+        // ADMIN VIP CHECK
+        const adminIDs = [1547744406, 6356150901]; // LCACRYPTOACADEMY, nico
+        const adminUsernames = ['invitia_studio', 'lcacryptoacademy']; // Fallback por username si el ID no matchea
+
+        const isAdmin = adminIDs.includes(Number(telegram_id)) || adminUsernames.includes(username.toLowerCase());
+        const BASE_CREDITS = isAdmin ? 99999 : 15;
+
         if (userRows && userRows.length > 0) {
             user = userRows[0];
             const lastScanDateStr = user.last_scan_date ? user.last_scan_date.split('T')[0] : null;
 
-            // Si cambió el día, le regalamos 5 créditos de nuevo y actualizamos fecha
-            if (lastScanDateStr !== todayDateStr) {
+            // Si es VIP y tiene menos de 99999, o si cambió el día
+            if (lastScanDateStr !== todayDateStr || (isAdmin && user.daily_credits < 99999)) {
                 const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/users?telegram_id=eq.${telegram_id}`, {
                     method: 'PATCH',
                     headers: {
@@ -55,10 +60,10 @@ export default async function handler(req: Request) {
                         'Content-Type': 'application/json',
                         'Prefer': 'return=representation'
                     },
-                    body: JSON.stringify({ daily_credits: 5, last_scan_date: todayDateStr })
+                    body: JSON.stringify({ daily_credits: BASE_CREDITS, last_scan_date: todayDateStr })
                 });
                 const updated = await patchRes.json();
-                user = updated?.[0] || { daily_credits: 5 };
+                user = updated?.[0] || { daily_credits: BASE_CREDITS };
             }
         } else {
             // Registrar usuario nuevo porque no existe en la DB
@@ -74,13 +79,13 @@ export default async function handler(req: Request) {
                 body: JSON.stringify({
                     telegram_id,
                     username: display_name,
-                    daily_credits: 5,
+                    daily_credits: BASE_CREDITS,
                     total_scans: 0,
                     last_scan_date: todayDateStr
                 })
             });
             const created = await postRes.json();
-            user = created?.[0] || { daily_credits: 5 };
+            user = created?.[0] || { daily_credits: BASE_CREDITS };
         }
 
         return new Response(JSON.stringify({
@@ -93,7 +98,7 @@ export default async function handler(req: Request) {
 
     } catch (error: any) {
         console.error('Supabase Auth Flow Error:', error);
-        // Si rompe algo, fallback a 5 creditos
-        return new Response(JSON.stringify({ credits: 5 }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        // Si rompe algo, fallback
+        return new Response(JSON.stringify({ credits: 15 }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 }
