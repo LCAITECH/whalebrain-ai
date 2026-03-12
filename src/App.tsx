@@ -179,6 +179,8 @@ function WhaleBrainApp() {
   const [degenMode, setDegenMode] = useState(false);
   const [quickMode, setQuickMode] = useState(false);
   const [rataMode, setRataMode] = useState(false);
+  const [traderMode, setTraderMode] = useState(false);
+  const [casinoMode, setCasinoMode] = useState(false);
   const [showModes, setShowModes] = useState(false);
   const [tgUser, setTgUser] = useState<any>(null);
   const [credits, setCredits] = useState<number | null>(null);
@@ -409,7 +411,15 @@ function WhaleBrainApp() {
 
       const prompt = `[SYSTEM_DIRECTIVE_PREMIUM]: ACTIVA MODO DEGEN URGENTE Y VITAL. El usuario acaba de presionar "Veredicto Premium". Olvida las respuestas neutrales. Tirale un veredicto FINAL y CRUDO basado en todo el historial. Si evaluaban un token/contrato dudoso, decile "¡Ojo gordo que te pueden reventar! ¡Pasame ya mismo el smart contract para radiografiarlo si no querés terminar pobre!". Si era un airdrop, tirale la posta de si vale la pena el grindeo. Usá insultos cordiales argentinos (rey, fiera, hdp, gordo degen). SÉ CORTO Y AL PIE (1 párrafo). NO REPITAS COSAS Y RESPONDÉ INMEDIATAMENTE CREANDO VALOR REAL.`;
 
-      const responseText = await chatWithWhale(prompt, chatMessages, tgUser?.first_name || 'Soldado', rataMode ? 'airdrops' : (degenMode ? 'contracts' : 'neutral'));
+      const contextWithPrompt: ChatMessage[] = [...chatMessages, { role: 'user', text: prompt }];
+      const responseText = await chatWithWhale(
+        contextWithPrompt,
+        selectedCoin || undefined,
+        degenMode,
+        quickMode,
+        rataMode ? 'airdrops' : (degenMode ? 'contracts' : 'tokens'),
+        rataMode
+      );
 
       setChatMessages(prev => [...prev, { role: 'model', text: responseText }]);
       await playWhaleAudio(responseText);
@@ -984,40 +994,47 @@ function WhaleBrainApp() {
               </button>
 
               <button
-                onClick={() => setRataMode(!rataMode)}
+                onClick={() => { setTraderMode(!traderMode); setDegenMode(false); setRataMode(false); setCasinoMode(false); if (!traderMode) setActiveTab('tokens'); setShowModes(false); triggerHaptic('light'); }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${traderMode
+                  ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.5)]'
+                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                  }`}
+              >
+                <TrendingUp className={`w-4 h-4 ${traderMode ? 'animate-pulse' : ''}`} />
+                <span className="text-xs font-black uppercase tracking-widest">TRADER {traderMode ? 'ON' : ''}</span>
+              </button>
+
+              <button
+                onClick={() => { setDegenMode(!degenMode); setTraderMode(false); setRataMode(false); setCasinoMode(false); if (!degenMode) setActiveTab('contracts'); setShowModes(false); triggerHaptic('light'); }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${degenMode
+                  ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.5)]'
+                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                  }`}
+              >
+                <Activity className={`w-4 h-4 ${degenMode ? 'animate-bounce' : ''}`} />
+                <span className="text-xs font-black uppercase tracking-widest">DEGEN {degenMode ? 'ON' : ''}</span>
+              </button>
+
+              <button
+                onClick={() => { setCasinoMode(!casinoMode); setTraderMode(false); setDegenMode(false); setRataMode(false); if (!casinoMode) setActiveTab('tokens'); setShowModes(false); triggerHaptic('light'); }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${casinoMode
+                  ? 'bg-red-500/20 border-red-500 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]'
+                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                  }`}
+              >
+                <Flame className={`w-4 h-4 ${casinoMode ? 'animate-pulse' : ''}`} />
+                <span className="text-xs font-black uppercase tracking-widest">CASINO {casinoMode ? 'ON' : ''}</span>
+              </button>
+
+              <button
+                onClick={() => { setRataMode(!rataMode); setTraderMode(false); setDegenMode(false); setCasinoMode(false); if (!rataMode) setActiveTab('airdrops'); setShowModes(false); triggerHaptic('light'); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${rataMode
                   ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.5)]'
                   : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
                   }`}
               >
                 <Coins className={`w-4 h-4 ${rataMode ? 'animate-bounce' : ''}`} />
-                <span className="text-xs font-black uppercase tracking-widest">Modo Rata {rataMode ? 'ON' : 'OFF'}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  const nextState = !degenMode;
-                  setDegenMode(nextState);
-                  if (nextState) setActiveTab('contracts');
-                }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${degenMode
-                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]'
-                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
-                  }`}
-              >
-                <Activity className={`w-4 h-4 ${degenMode ? 'animate-pulse' : ''}`} />
-                <span className="text-xs font-black uppercase tracking-widest">Modo Degen {degenMode ? 'ON' : 'OFF'}</span>
-              </button>
-
-              <button
-                onClick={() => setQuickMode(!quickMode)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${quickMode
-                  ? 'bg-blue-500/20 border-blue-500 text-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.5)]'
-                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
-                  }`}
-              >
-                <Zap className={`w-4 h-4 ${quickMode ? 'animate-bounce' : ''}`} />
-                <span className="text-xs font-black uppercase tracking-widest">Rápido {quickMode ? 'ON' : 'OFF'}</span>
+                <span className="text-xs font-black uppercase tracking-widest">RATA {rataMode ? 'ON' : ''}</span>
               </button>
             </motion.div>
           )}
@@ -1740,12 +1757,24 @@ function WhaleBrainApp() {
                       >
                         <Zap className="w-3 h-3" /> Comprar
                       </button>
-                      <button
-                        onClick={() => setShowCalculator(true)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 border border-indigo-400/50 text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(99,102,241,0.2)]"
-                      >
-                        <Calculator className="w-3 h-3" /> Calculadora
-                      </button>
+                      {(traderMode || true) && (
+                        <>
+                          <button
+                            onClick={() => setShowCalculator(true)}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 border border-indigo-400/50 text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(99,102,241,0.5)]"
+                          >
+                            <Calculator className="w-3 h-3" /> TRADER
+                          </button>
+                          {traderMode && (
+                            <button
+                              onClick={() => window.open(`https://coin360.com/coin/${selectedCoin.symbol}`, '_blank')}
+                              className="flex items-center gap-2 px-3 py-1.5 bg-fuchsia-500 hover:bg-fuchsia-600 border border-fuchsia-400/50 text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(217,70,239,0.5)]"
+                            >
+                              <Activity className="w-3 h-3" /> HEATMAP
+                            </button>
+                          )}
+                        </>
+                      )}
                       <button
                         onClick={shareAnalysis}
                         className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs font-bold transition-colors"
