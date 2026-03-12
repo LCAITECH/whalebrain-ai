@@ -185,6 +185,7 @@ function WhaleBrainApp() {
   const [tgUser, setTgUser] = useState<any>(null);
   const [credits, setCredits] = useState<number | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
+  const [showHeatmap, setShowHeatmap] = useState(false);
 
   // Audio UX Helpers
   const playClick = () => {
@@ -433,7 +434,10 @@ function WhaleBrainApp() {
       setChatLoading(true);
       setAudioLoading(true);
 
-      const dataContext = selectedCoin ? `
+      let dataContext = "NO HAY TOKEN SELECCIONADO. Haz un análisis macro del mercado cripto hoy.";
+
+      if (selectedCoin) {
+        dataContext = `
 📊 DATOS HARDCORE DEL ESCÁNER DEXSCREENER:
 - Nombre: ${selectedCoin.name} (${selectedCoin.symbol})
 - Red/Chain: ${selectedCoin.chain_id?.toUpperCase() || 'Desconocida'}
@@ -442,7 +446,22 @@ function WhaleBrainApp() {
 - Volumen 24h: $${selectedCoin.market_data?.total_volume?.usd || 'N/D'}
 - Market Cap / FDV: $${selectedCoin.market_data?.market_cap?.usd || selectedCoin.fdv || 'N/D'}
 - Txns 24h (Compras/Ventas): ${selectedCoin.txns?.h24?.buys || 0} compras / ${selectedCoin.txns?.h24?.sells || 0} ventas.
-` : "NO HAY TOKEN SELECCIONADO. Haz un análisis macro del mercado cripto hoy.";
+`;
+      } else {
+        try {
+          const btcRes = await fetch('/api/coin?id=bitcoin&degen=false');
+          if (btcRes.ok) {
+            const btcData = await btcRes.json();
+            const btcPrice = btcData.market_data?.current_price?.usd;
+            const btcChange = btcData.market_data?.price_change_percentage_24h;
+            if (btcPrice) {
+              dataContext = `NO HAY TOKEN SELECCIONADO. Haz un análisis macro del mercado cripto hoy. DATOS EN TIEMPO REAL: Bitcoin (BTC) está en $${btcPrice.toLocaleString()} (Cambio 24h: ${btcChange || 0}%). Usa este dato para no alucinar precios viejos.`;
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching live BTC for macro verdict:", err);
+        }
+      }
 
       const prompt = `[SISTEMA PREMIUM DESBLOQUEADO]: EL USUARIO ACABA DE PAGAR 1 BATERÍA POR ESTO. Sos la Ballena experta y tenés acceso VIP a esta data on-chain. Resumile brutalmente qué significa esto en un AUDIO EXPLICATIVO (responde 1 solo párrafo directo para TTS, sin usar markdown, asteriscos ni listas). 
 ${dataContext}
@@ -469,6 +488,44 @@ INSTRUCCIONES CLAVE:
     } catch (err) {
       console.error(err);
       triggerToast("Error generando Veredicto Premium.");
+    } finally {
+      setChatLoading(false);
+      setAudioLoading(false);
+    }
+  };
+
+  const generateTraderNewsAudio = async () => {
+    if (credits === null || credits < 1) {
+      triggerToast('Batería insuficiente. Recargá energía para escuchar las Noticias Macro.');
+      setShowEnergyStore(true);
+      return;
+    }
+
+    try {
+      setChatLoading(true);
+      setAudioLoading(true);
+      
+      const prompt = `[SISTEMA PREMIUM DESBLOQUEADO]: EL USUARIO ACABA DE PAGAR 1 BATERÍA POR ESTO. Eres "Neural Guru", pero para este reporte adopta el rol de un LOCUTOR DE RADIO PROFESIONAL, INSTITUCIONAL Y SERIO. 
+No te burles del usuario. No uses sarcasmo. Da un reporte macroeconómico y cripto del día de forma coherente y objetiva, como si fuera un boletín informativo de primera línea.
+Haz un resumen de lo que está pasando hoy con Bitcoin, Ethereum, y el sentimiento general del mercado.
+Si no tienes noticias en vivo exactas de hoy, da un panorama general de análisis técnico y macro realista sobre inflación, ETFs, liquidez, y tasas de interés.
+EL TEXTO SERÁ LEÍDO POR TTS, RESPONSDE 1 PÁRRAFO UNICAMENTE.`;
+
+      const isolatedContext: ChatMessage[] = [{ role: 'user', text: prompt }];
+      const responseText = await chatWithWhale(
+        isolatedContext,
+        undefined,
+        false,
+        false,
+        'tokens',
+        false
+      );
+      
+      setChatMessages(prev => [...prev, { role: 'model', text: responseText }]);
+      await playWhaleAudio(responseText);
+    } catch (err) {
+      console.error(err);
+      triggerToast("Error generando Noticias Macro.");
     } finally {
       setChatLoading(false);
       setAudioLoading(false);
@@ -836,6 +893,42 @@ INSTRUCCIONES CLAVE:
 
               <div className="mt-8 text-center text-zinc-500 text-xs font-black tracking-widest uppercase animate-pulse">
                 📸 Saca captura de pantalla para compartir
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Crypto Heatmap Modal */}
+      <AnimatePresence>
+        {showHeatmap && selectedCoin && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[10000] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4"
+          >
+            <div className="w-full max-w-4xl h-[80vh] relative bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl">
+              <div className="absolute top-0 inset-x-0 h-14 bg-zinc-900 flex items-center justify-between px-6 z-10 border-b border-zinc-800">
+                <div className="flex items-center gap-2 text-fuchsia-400 font-black uppercase tracking-widest text-sm">
+                  <Activity className="w-4 h-4" /> Live Heatmap
+                </div>
+                <button
+                  onClick={() => setShowHeatmap(false)}
+                  className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="w-full h-full pt-14">
+                <iframe
+                  src={`https://s.tradingview.com/widgetembed/?symbol=${selectedCoin.symbol.toUpperCase()}USDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D&overrides=%7B%7D&wordwrap=1&no_referral_id=1`}
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
               </div>
             </div>
           </motion.div>
@@ -1282,6 +1375,29 @@ INSTRUCCIONES CLAVE:
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Trader Live Feed (Audio News Trigger) */}
+        {!selectedCoin && activeTab === 'tokens' && traderMode && (
+          <div className="mb-12 bg-indigo-900/40 border border-indigo-500/30 rounded-3xl p-4 flex flex-col gap-3 max-w-3xl mx-auto shadow-[0_0_30px_rgba(99,102,241,0.15)] relative overflow-hidden">
+             <div className="absolute inset-0 bg-indigo-500/5 mix-blend-overlay pointer-events-none" />
+             <div className="flex items-center justify-between px-2 pb-2 border-b border-indigo-500/30 relative z-10">
+              <div className="flex items-center gap-2">
+                <Brain className="w-5 h-5 text-indigo-400 animate-pulse" />
+                <span className="text-xs font-black uppercase tracking-widest text-indigo-300">Terminal Bloomberg Cripto</span>
+              </div>
+            </div>
+            <div className="flex justify-center mt-2 relative z-10 p-2">
+                <button
+                  onClick={generateTraderNewsAudio}
+                  disabled={audioLoading || chatLoading}
+                  className="w-full flex justify-center items-center gap-2 px-6 py-4 rounded-xl border border-fuchsia-500/50 bg-fuchsia-500/20 hover:bg-fuchsia-500/40 hover:border-fuchsia-400 text-fuchsia-300 font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(217,70,239,0.3)] disabled:opacity-50"
+                >
+                  {audioLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Volume2 className="w-6 h-6 animate-pulse" />}
+                  <span>Resumen Macro (1 ⚡)</span>
+                </button>
             </div>
           </div>
         )}
@@ -1970,13 +2086,35 @@ INSTRUCCIONES CLAVE:
                         {Math.abs(selectedCoin.market_data?.price_change_percentage_24h || 0).toFixed(2)}%
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 mt-2 sm:mt-0 justify-end">
+                      {selectedCoin.chain_id === 'solana' ? (
+                        <button
+                          onClick={() => window.open(`https://jup.ag/swap/USDC-${selectedCoin.id}`, '_blank')}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)] rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+                        >
+                          <Zap className="w-3 h-3" /> Jupiter
+                        </button>
+                      ) : selectedCoin.chain_id === 'bsc' || selectedCoin.chain_id === 'manta' ? (
+                        <button
+                          onClick={() => window.open(`https://pancakeswap.finance/swap?outputCurrency=${selectedCoin.id}`, '_blank')}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-black shadow-[0_0_15px_rgba(234,179,8,0.4)] rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+                        >
+                          <Zap className="w-3 h-3" /> PancakeSwap
+                        </button>
+                      ) : null}
                       <button
                         onClick={() => window.open(`https://dexscreener.com/search?q=${selectedCoin.id}`, '_blank')}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)] rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)] rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
                       >
-                        <Zap className="w-3 h-3" /> Comprar
+                         DexScreener
                       </button>
+                      <button
+                        onClick={() => window.open(`https://coinhall.org/search?q=${selectedCoin.id}`, '_blank')}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
+                      >
+                         Coinhall
+                      </button>
+                      
                       {(traderMode || true) && (
                         <>
                           <button
@@ -1987,7 +2125,7 @@ INSTRUCCIONES CLAVE:
                           </button>
                           {traderMode && (
                             <button
-                              onClick={() => window.open(`https://coin360.com/coin/${selectedCoin.symbol}`, '_blank')}
+                              onClick={() => setShowHeatmap(true)}
                               className="flex items-center gap-2 px-3 py-1.5 bg-fuchsia-500 hover:bg-fuchsia-600 border border-fuchsia-400/50 text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(217,70,239,0.5)]"
                             >
                               <Activity className="w-3 h-3" /> HEATMAP
