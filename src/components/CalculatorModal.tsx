@@ -137,25 +137,25 @@ export const CalculatorModal: React.FC<CalculatorModalProps> = ({ coinName, coin
 
                         <h4 className="text-xs font-black uppercase text-zinc-500 tracking-widest text-center mb-2">Resultados Estimados</h4>
 
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm font-bold text-zinc-400">Rentabilidad (ROE)</span>
-                            <span className={`text-lg font-black ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        <div className="flex justify-between items-center gap-2">
+                            <span className="text-xs sm:text-sm font-bold text-zinc-400 shrink-0">Rentabilidad (ROE)</span>
+                            <span className={`text-base sm:text-lg font-black break-all text-right ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                 {pnl > 0 ? '+' : ''}{roe.toFixed(2)}%
                             </span>
                         </div>
 
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm font-bold text-zinc-400">Ganancia/Pérdida (PnL)</span>
-                            <span className={`text-lg font-black ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        <div className="flex justify-between items-center gap-2">
+                            <span className="text-xs sm:text-sm font-bold text-zinc-400 shrink-0">Ganancia/Pérdida (PnL)</span>
+                            <span className={`text-base sm:text-lg font-black break-all text-right ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                 {pnl > 0 ? '+' : ''}{formatCurrency(pnl)} USDT
                             </span>
                         </div>
 
-                        <div className="pt-3 border-t border-zinc-800 flex justify-between items-center">
-                            <span className="text-sm font-bold text-amber-500/80 flex items-center gap-1">
-                                <AlertTriangle className="w-4 h-4" /> Precio Liquidación
+                        <div className="pt-3 border-t border-zinc-800 flex justify-between items-center gap-2">
+                            <span className="text-xs sm:text-sm font-bold text-amber-500/80 flex items-center gap-1 shrink-0">
+                                <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4" /> Liquidación
                             </span>
-                            <span className="text-md font-black text-amber-400">
+                            <span className="text-sm sm:text-md font-black text-amber-400 break-all text-right">
                                 {formatCurrency(liqPrice)} USDT
                             </span>
                         </div>
