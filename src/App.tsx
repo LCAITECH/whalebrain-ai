@@ -394,6 +394,33 @@ function WhaleBrainApp() {
     }
   };
 
+  const generatePremiumVerdict = async () => {
+    if (credits === null || credits < 1) {
+      triggerToast('Batería insuficiente. Recargá energía para el Veredicto Premium.');
+      setShowEnergyStore(true);
+      return;
+    }
+
+    try {
+      setChatLoading(true);
+      setAudioLoading(true);
+
+      const prompt = `[SYSTEM_DIRECTIVE_PREMIUM]: ACTIVA MODO DEGEN URGENTE Y VITAL. El usuario acaba de presionar "Veredicto Premium". Olvida las respuestas neutrales. Tirale un veredicto FINAL y CRUDO basado en todo el historial. Si evaluaban un token/contrato dudoso, decile "¡Ojo gordo que te pueden reventar! ¡Pasame ya mismo el smart contract para radiografiarlo si no querés terminar pobre!". Si era un airdrop, tirale la posta de si vale la pena el grindeo. Usá insultos cordiales argentinos (rey, fiera, hdp, gordo degen). SÉ CORTO Y AL PIE (1 párrafo). NO REPITAS COSAS Y RESPONDÉ INMEDIATAMENTE CREANDO VALOR REAL.`;
+
+      const responseText = await chatWithWhale(prompt, chatMessages, tgUser?.first_name || 'Soldado', rataMode ? 'airdrops' : (degenMode ? 'contracts' : 'neutral'));
+
+      setChatMessages(prev => [...prev, { role: 'model', text: responseText }]);
+      await playWhaleAudio(responseText);
+
+    } catch (err) {
+      console.error(err);
+      triggerToast("Error generando Veredicto Premium.");
+    } finally {
+      setChatLoading(false);
+      setAudioLoading(false);
+    }
+  };
+
   // Cyber Whale Image URL from user
   const WHALE_IMAGE = "/cyber_whale.png";
 
@@ -1948,16 +1975,16 @@ function WhaleBrainApp() {
                   ))}
                 </div>
 
-                {/* Manual Audio Trigger */}
-                {chatMessages.length > 0 && chatMessages[chatMessages.length - 1].role === 'model' && (
+                {/* Premium Verdict Trigger */}
+                {chatMessages.length > 0 && (
                   <div className="px-4 py-3 border-b border-zinc-800 bg-zinc-900/40 flex justify-center">
                     <button
-                      onClick={() => playWhaleAudio(chatMessages[chatMessages.length - 1].text)}
-                      disabled={audioLoading}
+                      onClick={() => generatePremiumVerdict()}
+                      disabled={audioLoading || chatLoading}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {audioLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
-                      {audioLoading ? 'Comprimiendo...' : 'Escuchar Veredicto (Gasta Energía)'}
+                      {(audioLoading || chatLoading) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
+                      {(audioLoading || chatLoading) ? 'Generando Veredicto...' : 'Escuchar Veredicto Premium (Gasta Energía)'}
                     </button>
                   </div>
                 )}
