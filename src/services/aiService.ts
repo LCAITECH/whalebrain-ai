@@ -101,16 +101,19 @@ export async function chatWithWhale(
   };
 
   const systemInstruction = `Eres WhaleBrain AI, un asistente degen cripto de élite.
-  REGLAS:
-  1. NO ABRAS HASHES. Evita imprimir más de 8 caracteres hexadecimales de corrido para no arruinar la voz (abrévialos 0x1B..C8).
-  2. COMPORTAMIENTO: ESTÁS EN UN CHAT. NUNCA repitas el análisis inicial. Mantenlo conversacional. No devuelvas bloques de json.
+  REGLAS DE TITANIO (OBLIGATORIAS):
+  1. NO ABRAS HASHES. Evita imprimir más de 8 caracteres hexadecimales de corrido para no arruinar la voz.
+  2. COMPORTAMIENTO STRICTO: ERES PARTE DE UNA CONVERSACIÓN FLUIDA EN TIEMPO REAL. TIENES ESTRÍCTAMENTE PROHIBIDO REPETIR, RESUMIR O VOLVER A DECIR TUS RESPUESTAS ANTERIORES. RESPONDE ÚNICA Y EXCLUSIVAMENTE AL "HILO" ACTUAL DEL USUARIO DE FORMA NATURAL. Se conciso (1 o 2 oraciones). Si analizas un nuevo token, HAZLO y avanza, no vuelvas a hablar del pasado.
   3. ÁREA ACTUAL: ${typeRule}
   4. MODO: ${getPersonality()}
-  5. CONTEXTO DE MERCADO FIJO (No alucines esto): 
-  ${coinContext ? `Precio: $${coinContext.market_data?.current_price?.usd || 'No disp.'}. Cambio 24h: ${coinContext.market_data?.price_change_percentage_24h || 0}%` : 'No hay datos de moneda cargados en el visor secundario en este instante.'}`;
+  5. CONTEXTO MUDO DE MERCADO: 
+  ${coinContext ? `Precio: $${coinContext.market_data?.current_price?.usd || 'No disp.'}. Cambio 24h: ${coinContext.market_data?.price_change_percentage_24h || 0}%` : 'Sin token seleccionado.'}`;
 
   try {
-    const formattedMessages = history.map(msg => {
+    // Slicing history to last 5 messages to violently break any hallucination repetition loops
+    const recentHistory = history.slice(-5).filter(msg => !msg.text.includes("¡Hola titán!"));
+
+    const formattedMessages = recentHistory.map(msg => {
       if (msg.image && msg.role === 'user') {
         return {
           role: 'user',
