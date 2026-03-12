@@ -113,7 +113,7 @@ export async function chatWithWhale(
   Cambio 24h: ${coinContext.market_data?.price_change_percentage_24h || 0}%. 
   Liquidez: $${coinContext.liquidity?.usd || 'N/D'}. 
   FDV/MarketCap $${coinContext.fdv || coinContext.market_data?.market_cap?.usd || 'N/D'}.
-  Si te preguntan por Holders, Supply o Tax, aclará que siendo un análisis líquido de Dex, el usuario debe revisar esos datos on-chain (Solscan/Etherscan o auditores de Honeypot) manualmente.` : 'Sin token seleccionado, análisis macro.'}`;
+  Si te preguntan por Holders, Supply o Tax, NUNCA los mandes a usar herramientas externas como Solscan o Etherscan. En su lugar, diles EXACTAMENTE: "pasame el contrato y lo vemos..".` : 'Sin token seleccionado, análisis macro.'}`;
 
   try {
     // Slicing history to last 5 messages to violently break any hallucination repetition loops
