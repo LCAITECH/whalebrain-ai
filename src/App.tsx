@@ -193,7 +193,7 @@ function WhaleBrainApp() {
       if (!inauguralDone) {
         localStorage.setItem('whale_inaugural_greeting', 'done');
         localStorage.setItem('whale_last_greeting', todayStr);
-        const greetingMsg = `¡Bienvenido soldado ${tgUser.first_name}! Soy Neural Guru, tu ballena de cabecera. Esta app es el búnker definitivo de LCA, un loco demente experto en DEFI, cripto e IA que juntó todas las herramientas acá para que revientes el mercado. Preguntame lo que quieras.`;
+        const greetingMsg = `¡Bienvenido soldado ${tgUser.first_name}! Soy Neural Guru, tu ballena de cabecera. Esta app es el búnker definitivo de LCA, un loco demente experto en DEFI, cripto e IA que juntó todas las herramientas acá para que revientes el mercado. Preguntame lo que quieras. Para una experiencia más cómoda y de verdadero Degen, te sugiero fuertemente usar Telegram Desktop.`;
         setChatMessages(prev => prev.length === 0 ? [{ role: 'model', text: greetingMsg }] : prev);
         setShowChat(true);
       } else if (lastGreeting !== todayStr) {
@@ -1923,7 +1923,7 @@ function WhaleBrainApp() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="px-4 py-3 flex flex-wrap gap-2 max-w-full border-b border-zinc-800 bg-zinc-900/30">
+                <div className="px-4 py-3 flex gap-2 max-w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-b border-zinc-800 bg-zinc-900/30">
                   {[
                     ...(degenMode ? [
                       { label: 'Simulador All-In', icon: Zap, prompt: 'Haz un simulador de All-In para esta moneda con 1000 USDT.' },
