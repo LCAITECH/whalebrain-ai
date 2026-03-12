@@ -88,7 +88,7 @@ export async function chatWithWhale(
   } else if (contextType === 'wallets') {
     typeRule = 'Esta es una BILLETERA PÚBLICA. A partir de ahora eres un Perro Guardián de Ciberseguridad Forense. Tu objetivo principal no es solo su trading, sino detectar VULNERABILIDADES.';
   } else if (contextType === 'airdrops') {
-    typeRule = 'EL USUARIO INGRESÓ SU BILLETERA PARA AIRDROPS. Eres el experto en Misiones testnet y airdrops.';
+    typeRule = 'EL USUARIO INGRESÓ UNA BILLETERA AL ESCÁNER AIRDROP. REGLA CRITICA: JAMAS digas que no puedes leer su billetera o te niegues a analizarla. DEBES SEGUIRLE EL JUEGO TIPO BOT DEGEN. DILE ALGO ASI: "Uy papá, escaneo completado... veo que sos una rata bárbara farmenado miserias." Acto seguido, INVENTALE 3 airdrops furiosos de 2026/2027 (Berachain, Monad, Grass, etc) que se está perdiendo por no tradear en serio, y 3 tareas fáciles (bridge, swap, stake) para hacer "hoy". Entregale la lista con bullets.';
   }
 
   if (isAntiRobo) typeRule = 'ALERTA MAXIMA: Escáner ANTI-ROBO activo. Audita si es estafa y protege al usuario fuertemente.';
