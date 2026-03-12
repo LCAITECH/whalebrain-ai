@@ -186,6 +186,30 @@ function WhaleBrainApp() {
   const [credits, setCredits] = useState<number | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
 
+  // Audio UX Helpers
+  const playClick = () => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.5, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.1);
+    } catch (e) { console.error("WebAudio Ping Blocked", e); }
+  };
+
+  const playSound = (filename: string) => {
+    try {
+      const a = new Audio(`/${filename}`);
+      a.volume = 0.6;
+      a.play().catch(e => console.error("Audio File Blocked", e));
+    } catch (e) { console.error("Audio Instance Failed", e); }
+  };
+
   // Saludo Automático
   useEffect(() => {
     if (!tgUser?.first_name) return;
@@ -409,11 +433,29 @@ function WhaleBrainApp() {
       setChatLoading(true);
       setAudioLoading(true);
 
-      const prompt = `[SYSTEM_DIRECTIVE_PREMIUM]: ACTIVA MODO DEGEN URGENTE Y VITAL. El usuario acaba de presionar "Veredicto Premium". Olvida las respuestas neutrales. Tirale un veredicto FINAL y CRUDO basado en todo el historial. Si evaluaban un token/contrato dudoso, decile "¡Ojo gordo que te pueden reventar! ¡Pasame ya mismo el smart contract para radiografiarlo si no querés terminar pobre!". Si era un airdrop, tirale la posta de si vale la pena el grindeo. Usá insultos cordiales argentinos (rey, fiera, hdp, gordo degen). SÉ CORTO Y AL PIE (1 párrafo). NO REPITAS COSAS Y RESPONDÉ INMEDIATAMENTE CREANDO VALOR REAL.`;
+      const dataContext = selectedCoin ? `
+📊 DATOS HARDCORE DEL ESCÁNER DEXSCREENER:
+- Nombre: ${selectedCoin.name} (${selectedCoin.symbol})
+- Red/Chain: ${selectedCoin.chain_id?.toUpperCase() || 'Desconocida'}
+- Precio: $${selectedCoin.market_data?.current_price?.usd || 'N/D'}
+- Liquidez Total (USD): $${selectedCoin.liquidity?.usd || 'N/D'}
+- Volumen 24h: $${selectedCoin.market_data?.total_volume?.usd || 'N/D'}
+- Market Cap / FDV: $${selectedCoin.market_data?.market_cap?.usd || selectedCoin.fdv || 'N/D'}
+- Txns 24h (Compras/Ventas): ${selectedCoin.txns?.h24?.buys || 0} compras / ${selectedCoin.txns?.h24?.sells || 0} ventas.
+` : "NO HAY TOKEN SELECCIONADO. Haz un análisis macro del mercado cripto hoy.";
 
-      const contextWithPrompt: ChatMessage[] = [...chatMessages, { role: 'user', text: prompt }];
+      const prompt = `[SISTEMA PREMIUM DESBLOQUEADO]: EL USUARIO ACABA DE PAGAR 1 BATERÍA POR ESTO. Sos la Ballena experta y tenés acceso VIP a esta data on-chain. Resumile brutalmente qué significa esto en un AUDIO EXPLICATIVO (responde 1 solo párrafo directo para TTS, sin usar markdown, asteriscos ni listas). 
+${dataContext}
+INSTRUCCIONES CLAVE: 
+1. Si tiene poca liquidez decile "TE VAN A RUGPULLAR". 
+2. Mencioná en qué Blockchain está (ej: Solana, Base, ETH).
+3. Si la liquidez o los datos duros son buenos pero te falta info de Top Holders o Supply, EXPLICÁLE verbalmente: "yo soy una ballena de liquidez, para ver los top holders metete al contrato en Solscan/Etherscan a mano porque acá importan los tiburones actuando en Dex Screener".
+4. Hablá como un Degen cínico y experto. Usá lunfardo argentino moderado.
+5. DEBES IGNORAR TOTALMENTE EL HISTORIAL DE CHAT PASADO PARA NO REPETIRTE. Da un Veredicto Fresco.`;
+
+      const isolatedContext: ChatMessage[] = [{ role: 'user', text: prompt }];
       const responseText = await chatWithWhale(
-        contextWithPrompt,
+        isolatedContext,
         selectedCoin || undefined,
         degenMode,
         quickMode,
@@ -837,6 +879,54 @@ function WhaleBrainApp() {
         )}
       </AnimatePresence>
 
+      {/* Trader Mode Pulse */}
+      <AnimatePresence>
+        {traderMode && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9998] pointer-events-none border-[8px] md:border-[16px] border-indigo-500/30 shadow-[inset_0_0_200px_rgba(99,102,241,0.3)] transition-colors duration-1000"
+          >
+            <div className="absolute inset-0 bg-indigo-500/[0.02] mix-blend-overlay pointer-events-none" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Casino Mode Roulette Flasher */}
+      <AnimatePresence>
+        {casinoMode && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9998] pointer-events-none transition-colors duration-[400ms]"
+          >
+            <style>{`
+              @keyframes roulette-flash {
+                0%, 100% { box-shadow: inset 0 0 300px rgba(239, 68, 68, 0.4); border-color: rgba(239, 68, 68, 0.8); }
+                50% { box-shadow: inset 0 0 300px rgba(0, 0, 0, 0.8); border-color: rgba(20, 20, 20, 0.9); }
+              }
+            `}</style>
+            <div className="absolute inset-0 border-[12px] md:border-[24px]" style={{ animation: 'roulette-flash 1s infinite' }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Degen Mode Warning Frame */}
+      <AnimatePresence>
+        {degenMode && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9998] pointer-events-none border-[8px] md:border-[16px] border-orange-500/40 shadow-[inset_0_0_250px_rgba(249,115,22,0.35)] transition-colors duration-1000"
+          >
+            <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')" }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Rata Mode Frame Glow & Falling Rats Effect */}
       <AnimatePresence>
         {rataMode && (
@@ -964,11 +1054,16 @@ function WhaleBrainApp() {
         )}
 
         <button
-          onClick={() => setShowModes(!showModes)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${showModes ? 'bg-zinc-800 border-cyan-500 text-cyan-400' : 'bg-zinc-900/80 border-cyan-500/30 text-cyan-500 hover:bg-zinc-800/80'} shadow-[0_0_15px_rgba(6,182,212,0.2)] backdrop-blur-md scale-100 hover:scale-105 active:scale-95`}
+          onClick={() => { playClick(); setShowModes(!showModes); }}
+          className={`relative flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${showModes ? 'bg-zinc-800 border-cyan-500 text-cyan-400' : 'bg-zinc-900/80 border-cyan-500/30 text-cyan-500 hover:bg-zinc-800/80'} shadow-[0_0_15px_rgba(6,182,212,0.6)] backdrop-blur-md scale-100 hover:scale-105 active:scale-95 ${!showModes && !traderMode && !degenMode && !casinoMode && !rataMode ? 'animate-pulse' : ''}`}
         >
           <Cpu className={`w-5 h-5 ${showModes ? 'animate-pulse' : ''}`} />
           <span className="text-xs font-black uppercase tracking-widest">{showModes ? 'CERRAR' : 'MODOS'}</span>
+          {!showModes && (
+            <span className="absolute -top-3 -left-3 bg-red-500 border border-red-400 text-white text-[9px] font-black px-2 py-0.5 rounded-full animate-bounce shadow-[0_0_10px_rgba(239,68,68,0.8)] pointer-events-none">
+              ¡MÍRAME!
+            </span>
+          )}
         </button>
 
         <AnimatePresence>
@@ -981,6 +1076,7 @@ function WhaleBrainApp() {
             >
               <button
                 onClick={() => {
+                  playClick();
                   triggerHaptic('heavy');
                   setShowChat(true);
                   const antiRoboMsg = "🚨 **ESCÁNER ANTI-ROBO INICIADO.** \n\nSubime ACÁ MISMO (con el iconito verde oscuro de imagen que tenés a la izquierda del texto) la **captura de pantalla** de la aprobación de MetaMask, Phantom o de la Web turbia que estás por firmar.\n\nTe hago una radiografía y te digo si es un Honeypot, un Scam, o si vas a terminar perdiendo la casa.";
@@ -994,7 +1090,7 @@ function WhaleBrainApp() {
               </button>
 
               <button
-                onClick={() => { setTraderMode(!traderMode); setDegenMode(false); setRataMode(false); setCasinoMode(false); if (!traderMode) setActiveTab('tokens'); setShowModes(false); triggerHaptic('light'); }}
+                onClick={() => { if (!traderMode) playClick(); setTraderMode(!traderMode); setDegenMode(false); setRataMode(false); setCasinoMode(false); if (!traderMode) setActiveTab('tokens'); setShowModes(false); triggerHaptic('light'); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${traderMode
                   ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.5)]'
                   : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
@@ -1005,7 +1101,7 @@ function WhaleBrainApp() {
               </button>
 
               <button
-                onClick={() => { setDegenMode(!degenMode); setTraderMode(false); setRataMode(false); setCasinoMode(false); if (!degenMode) setActiveTab('contracts'); setShowModes(false); triggerHaptic('light'); }}
+                onClick={() => { if (!degenMode) playClick(); setDegenMode(!degenMode); setTraderMode(false); setRataMode(false); setCasinoMode(false); if (!degenMode) setActiveTab('contracts'); setShowModes(false); triggerHaptic('light'); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${degenMode
                   ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.5)]'
                   : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
@@ -1016,7 +1112,7 @@ function WhaleBrainApp() {
               </button>
 
               <button
-                onClick={() => { setCasinoMode(!casinoMode); setTraderMode(false); setDegenMode(false); setRataMode(false); if (!casinoMode) setActiveTab('tokens'); setShowModes(false); triggerHaptic('light'); }}
+                onClick={() => { if (!casinoMode) playSound('casino_machine.mp3'); else playClick(); setCasinoMode(!casinoMode); setTraderMode(false); setDegenMode(false); setRataMode(false); if (!casinoMode) setActiveTab('tokens'); setShowModes(false); triggerHaptic('light'); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${casinoMode
                   ? 'bg-red-500/20 border-red-500 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]'
                   : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
@@ -1027,7 +1123,7 @@ function WhaleBrainApp() {
               </button>
 
               <button
-                onClick={() => { setRataMode(!rataMode); setTraderMode(false); setDegenMode(false); setCasinoMode(false); if (!rataMode) setActiveTab('airdrops'); setShowModes(false); triggerHaptic('light'); }}
+                onClick={() => { if (!rataMode) playClick(); setRataMode(!rataMode); setTraderMode(false); setDegenMode(false); setCasinoMode(false); if (!rataMode) setActiveTab('airdrops'); setShowModes(false); triggerHaptic('light'); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${rataMode
                   ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.5)]'
                   : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
