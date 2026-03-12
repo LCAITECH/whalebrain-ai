@@ -1200,7 +1200,7 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONSDE 1 PÁRRAFO UNICAMENTE.`;
               </button>
 
               <button
-                onClick={() => { if (!traderMode) playClick(); setTraderMode(!traderMode); setDegenMode(false); setRataMode(false); setCasinoMode(false); if (!traderMode) setActiveTab('tokens'); setShowModes(false); triggerHaptic('light'); }}
+                onClick={() => { if (!traderMode) playSound('modo_trader.mp3'); else playClick(); setTraderMode(!traderMode); setDegenMode(false); setRataMode(false); setCasinoMode(false); if (!traderMode) setActiveTab('tokens'); setShowModes(false); triggerHaptic('light'); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${traderMode
                   ? 'bg-indigo-500/30 border-indigo-500 text-indigo-300 shadow-[0_0_30px_rgba(99,102,241,0.8)] scale-105'
                   : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-indigo-500/50 hover:text-indigo-400 hover:shadow-[0_0_15px_rgba(99,102,241,0.4)]'
@@ -1211,7 +1211,7 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONSDE 1 PÁRRAFO UNICAMENTE.`;
               </button>
 
               <button
-                onClick={() => { if (!degenMode) playClick(); setDegenMode(!degenMode); setTraderMode(false); setRataMode(false); setCasinoMode(false); if (!degenMode) setActiveTab('contracts'); setShowModes(false); triggerHaptic('light'); }}
+                onClick={() => { if (!degenMode) playSound('modo_degen.mp3'); else playClick(); setDegenMode(!degenMode); setTraderMode(false); setRataMode(false); setCasinoMode(false); if (!degenMode) setActiveTab('contracts'); setShowModes(false); triggerHaptic('light'); }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${degenMode
                   ? 'bg-orange-500/30 border-orange-500 text-orange-300 shadow-[0_0_30px_rgba(249,115,22,0.8)] scale-105'
                   : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:border-orange-500/50 hover:text-orange-400 hover:shadow-[0_0_15px_rgba(249,115,22,0.4)]'
