@@ -1239,7 +1239,7 @@ INSTRUCCIONES CLAVE:
         </div>
 
         {/* Smart Money Live Feed (Urgency Trigger) */}
-        {!selectedCoin && activeTab === 'tokens' && (
+        {!selectedCoin && activeTab === 'tokens' && !casinoMode && (
           <div className="mb-12 bg-zinc-900/60 border border-zinc-800 rounded-3xl p-4 flex flex-col gap-3 max-w-3xl mx-auto shadow-2xl">
             <div className="flex items-center justify-between px-2 pb-2 border-b border-zinc-800/50">
               <div className="flex items-center gap-2">
@@ -1279,6 +1279,61 @@ INSTRUCCIONES CLAVE:
                     <div className="text-[10px] text-zinc-600 font-medium whitespace-nowrap flex items-center gap-1">
                       <Clock className="w-3 h-3" /> {alert.time}
                     </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Casino Live: Top Memecoins */}
+        {!selectedCoin && activeTab === 'tokens' && casinoMode && (
+          <div className="mb-12 bg-black/60 border border-red-500/30 rounded-3xl p-4 flex flex-col gap-3 max-w-3xl mx-auto shadow-[0_0_30px_rgba(239,68,68,0.15)] relative overflow-hidden">
+             <div className="absolute inset-0 bg-red-500/5 mix-blend-overlay pointer-events-none" />
+             <div className="flex items-center justify-between px-2 pb-2 border-b border-red-500/30 relative z-10">
+              <div className="flex items-center gap-2">
+                <Flame className="w-5 h-5 text-red-500 animate-pulse" />
+                <span className="text-xs font-black uppercase tracking-widest text-red-400">Ruleta Memecoin: Top 10</span>
+              </div>
+              <span className="text-[10px] text-zinc-500 uppercase font-black tracking-widest flex items-center gap-1">
+                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping" />
+                Casino Live
+              </span>
+            </div>
+            <div className="space-y-2 mt-2 relative z-10">
+              {[
+                { token: 'PEPE', name: 'Pepe', network: 'ETH', mcap: '$3.5B', style: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+                { token: 'WIF', name: 'dogwifhat', network: 'SOL', mcap: '$2.1B', style: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
+                { token: 'DOGE', name: 'Dogecoin', network: 'DOGE', mcap: '$18B', style: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+                { token: 'SHIB', name: 'Shiba Inu', network: 'ETH', mcap: '$10B', style: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
+                { token: 'BONK', name: 'Bonk', network: 'SOL', mcap: '$1.2B', style: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
+                { token: 'FLOKI', name: 'Floki', network: 'BSC', mcap: '$1.5B', style: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+                { token: 'BOME', name: 'BOOK OF MEME', network: 'SOL', mcap: '$700M', style: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+                { token: 'POPCAT', name: 'Popcat', network: 'SOL', mcap: '$500M', style: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
+                { token: 'MEW', name: 'cat in a dogs world', network: 'SOL', mcap: '$400M', style: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+                { token: 'TRUMP', name: 'MAGA', network: 'ETH', mcap: '$300M', style: 'bg-rose-500/10 text-rose-400 border-rose-500/20' }
+              ].map((meme, i) => (
+                <div key={i} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-zinc-900/80 rounded-2xl border border-red-500/20 hover:border-red-500/50 hover:bg-red-950/30 transition-all hover:scale-[1.01] cursor-pointer group" onClick={() => handleSearch(meme.token)}>
+                  <div className="flex items-center gap-4">
+                    <div className="w-8 flex justify-center text-zinc-600 font-black text-lg italic group-hover:text-red-500/50">
+                      #{i + 1}
+                    </div>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shadow-inner border ${meme.style}`}>
+                      ${meme.token.substring(0, 4)}
+                    </div>
+                    <div>
+                      <div className="text-sm font-black text-white group-hover:text-red-400 transition-colors">${meme.token}</div>
+                      <div className="text-[10px] font-mono text-zinc-500">{meme.name}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-end">
+                      <span className="text-[10px] uppercase font-black tracking-widest text-zinc-500 mb-0.5">MCAP</span>
+                      <span className="text-xs font-mono font-black text-white">{meme.mcap}</span>
+                    </div>
+                    <span className="text-[10px] font-black tracking-widest uppercase px-2 py-1 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700">
+                      {meme.network}
+                    </span>
                   </div>
                 </div>
               ))}
