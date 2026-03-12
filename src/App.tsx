@@ -185,7 +185,6 @@ function WhaleBrainApp() {
   const [tgUser, setTgUser] = useState<any>(null);
   const [credits, setCredits] = useState<number | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
-  const [showHeatmap, setShowHeatmap] = useState(false);
 
   // Audio UX Helpers
   const playClick = () => {
@@ -899,42 +898,6 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONSDE 1 PÁRRAFO UNICAMENTE.`;
         )}
       </AnimatePresence>
 
-      {/* Crypto Heatmap Modal */}
-      <AnimatePresence>
-        {showHeatmap && selectedCoin && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10000] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4"
-          >
-            <div className="w-full max-w-4xl h-[80vh] relative bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl">
-              <div className="absolute top-0 inset-x-0 h-14 bg-zinc-900 flex items-center justify-between px-6 z-10 border-b border-zinc-800">
-                <div className="flex items-center gap-2 text-fuchsia-400 font-black uppercase tracking-widest text-sm">
-                  <Activity className="w-4 h-4" /> Live Heatmap
-                </div>
-                <button
-                  onClick={() => setShowHeatmap(false)}
-                  className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="w-full h-full pt-14">
-                <iframe
-                  src={`https://s.tradingview.com/widgetembed/?symbol=${selectedCoin.symbol.toUpperCase()}USDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D&overrides=%7B%7D&wordwrap=1&no_referral_id=1`}
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  allowFullScreen
-                  className="w-full h-full"
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Degen Mode Frame Glow & Shark Effect */}
       <AnimatePresence>
         {degenMode && (
@@ -1143,7 +1106,7 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONSDE 1 PÁRRAFO UNICAMENTE.`;
             className="flex items-center gap-2 px-4 py-2 rounded-full border bg-zinc-900/80 border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)] backdrop-blur-md hover:bg-cyan-900/40 transition-all group scale-100 hover:scale-105 active:scale-95"
           >
             <span className="text-sm font-black italic">{credits}</span>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 group-hover:text-cyan-400 transition-colors">⚡ ENERGÍA</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 group-hover:text-cyan-400 transition-colors">⚡ BATERÍA</span>
           </button>
         )}
 
@@ -2123,14 +2086,6 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONSDE 1 PÁRRAFO UNICAMENTE.`;
                           >
                             <Calculator className="w-3 h-3" /> TRADER
                           </button>
-                          {traderMode && (
-                            <button
-                              onClick={() => setShowHeatmap(true)}
-                              className="flex items-center gap-2 px-3 py-1.5 bg-fuchsia-500 hover:bg-fuchsia-600 border border-fuchsia-400/50 text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(217,70,239,0.5)]"
-                            >
-                              <Activity className="w-3 h-3" /> HEATMAP
-                            </button>
-                          )}
                         </>
                       )}
                       <button
@@ -2274,15 +2229,34 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONSDE 1 PÁRRAFO UNICAMENTE.`;
 
               {/* TradingView Widget - Solo para Tokens */}
               {!quickMode && activeTab === 'tokens' && selectedCoin.symbol && (
-                <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-4 overflow-hidden h-[500px]">
-                  <iframe
-                    src={`https://s.tradingview.com/widgetembed/?symbol=${selectedCoin.symbol.toUpperCase()}USDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D&overrides=%7B%7D&wordwrap=1&no_referral_id=1`}
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    allowFullScreen
-                  />
-                </div>
+                <>
+                  <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-4 overflow-hidden h-[500px]">
+                    <iframe
+                      src={`https://s.tradingview.com/widgetembed/?symbol=${selectedCoin.symbol.toUpperCase()}USDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D&overrides=%7B%7D&wordwrap=1&no_referral_id=1`}
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      allowFullScreen
+                    />
+                  </div>
+                  
+                  {/* Heatmap Widget (TradingView) */}
+                  <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 overflow-hidden h-[450px] shadow-2xl relative">
+                    <div className="absolute inset-0 bg-fuchsia-500/5 mix-blend-overlay pointer-events-none" />
+                    <div className="flex items-center gap-2 mb-4 text-fuchsia-400 font-black uppercase tracking-widest text-sm relative z-10">
+                      <Activity className="w-4 h-4" /> Live Heatmap del Mercado
+                    </div>
+                    <div className="w-full h-full relative z-10 rounded-xl overflow-hidden border border-zinc-800">
+                      <iframe 
+                        src="https://s.tradingview.com/embed-widget/crypto-coins-heatmap/?locale=es&colorTheme=dark&hasSymbolTooltip=true&isZoomEnabled=true&hasTopBar=false&isDataSetEnabled=false&blockSize=market_cap_calc&blockColor=change"
+                        width="100%"
+                        height="calc(100% - 32px)"
+                        frameBorder="0"
+                        allowFullScreen
+                      />
+                    </div>
+                  </div>
+                </>
               )}
 
               {/* Stats Grid - Hidden in Quick Mode */}
@@ -2624,60 +2598,96 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONSDE 1 PÁRRAFO UNICAMENTE.`;
               </button>
 
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-black text-white italic uppercase mb-2">WHALE ENERGY</h2>
+                <h2 className="text-2xl font-black text-white italic uppercase mb-2">WHALE BATTERY</h2>
                 <p className="text-sm text-zinc-400">Recargá tus pilas y seguí escaneando el ecosistema.</p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                {/* Pack 0: Mini */}
+                <button
+                  onClick={() => handleBuyEnergy(0.19, 15)}
+                  className="w-full p-3 rounded-xl border border-zinc-800 bg-zinc-900/50 flex items-center justify-between hover:border-zinc-500 hover:bg-zinc-800 transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="text-xl">🔋</div>
+                    <div className="text-left">
+                      <div className="text-white font-bold text-sm">Chispazo Mini</div>
+                      <div className="text-[10px] text-zinc-400">+15 Batería</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-white font-black text-sm">0.19 TON</div>
+                  </div>
+                </button>
+
                 {/* Pack 1 */}
                 <button
-                  onClick={() => handleBuyEnergy(0.5, 50)}
+                  onClick={() => handleBuyEnergy(0.49, 50)}
                   className="w-full p-4 rounded-xl border border-zinc-800 bg-zinc-900/50 flex items-center justify-between hover:border-blue-500/50 hover:bg-blue-500/10 transition-all group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="text-2xl">🐟</div>
+                    <div className="text-2xl drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]">🐟</div>
                     <div className="text-left">
                       <div className="text-white font-bold">Píldora Degen</div>
-                      <div className="text-xs text-blue-400">+50 Batería</div>
+                      <div className="text-xs text-blue-400 font-bold">+50 Batería</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-white font-black">0.5 TON</div>
+                    <div className="text-white font-black text-lg">0.49 TON</div>
                   </div>
                 </button>
 
-                {/* Pack 2 */}
+                {/* Pack 2: Tanque Tiburón (Eye-catching Glow) */}
                 <button
-                  onClick={() => handleBuyEnergy(1.5, 200)}
-                  className="w-full p-4 rounded-xl border border-zinc-800 bg-zinc-900/50 flex items-center justify-between hover:border-orange-500/50 hover:bg-orange-500/10 transition-all group relative overflow-hidden"
+                  onClick={() => handleBuyEnergy(1.49, 200)}
+                  className="w-full p-4 rounded-xl border-2 border-orange-500 bg-orange-500/10 flex items-center justify-between hover:bg-orange-500/20 transition-all group relative overflow-hidden shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:shadow-[0_0_30px_rgba(249,115,22,0.6)] animate-[pulse_2s_ease-in-out_infinite] hover:animate-none scale-[1.02]"
                 >
-                  <div className="absolute top-0 right-0 bg-orange-500 text-black text-[8px] font-black px-2 py-1 rounded-bl-lg uppercase tracking-widest">Popular</div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-2xl">🦈</div>
+                  <div className="absolute top-0 right-0 bg-orange-500 text-black text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-lg">Más Popular</div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-400/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="text-3xl drop-shadow-[0_0_15px_rgba(249,115,22,0.8)]">🦈</div>
                     <div className="text-left">
-                      <div className="text-white font-bold">Tanque Tiburón</div>
-                      <div className="text-xs text-orange-400">+200 Batería</div>
+                      <div className="text-white font-black text-lg">Tanque Tiburón</div>
+                      <div className="text-xs text-orange-400 font-black uppercase tracking-wider">+200 Batería</div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-white font-black">1.5 TON</div>
+                  <div className="text-right relative z-10 mt-2 sm:mt-0">
+                    <div className="text-white font-black text-xl">1.49 TON</div>
                   </div>
                 </button>
 
-                {/* Pack 3 */}
+                {/* Pack 3: Cofre Ballena */}
                 <button
-                  onClick={() => handleBuyEnergy(5, 99999)}
-                  className="w-full p-4 pl-5 rounded-xl border border-cyan-500/50 bg-cyan-900/20 flex items-center justify-between hover:border-cyan-400 hover:bg-cyan-900/40 transition-all group shadow-[0_0_15px_rgba(6,182,212,0.2)]"
+                  onClick={() => handleBuyEnergy(2.99, 500)}
+                  className="w-full p-4 rounded-xl border border-purple-500/50 bg-purple-900/20 flex items-center justify-between hover:border-purple-400 hover:bg-purple-900/40 transition-all group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="text-3xl drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">🐋</div>
+                    <div className="text-2xl drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">💎</div>
                     <div className="text-left">
-                      <div className="text-cyan-400 font-bold uppercase tracking-wide">Whale Pass</div>
-                      <div className="text-[10px] text-cyan-300">Energía Infinita (30 Días)</div>
+                      <div className="text-white font-bold">Reserva Elite</div>
+                      <div className="text-xs text-purple-400 font-bold">+500 Batería</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-white font-black">5 TON</div>
+                    <div className="text-white font-black text-lg">2.99 TON</div>
+                  </div>
+                </button>
+
+                {/* Pack 4: Whale Pass */}
+                <button
+                  onClick={() => handleBuyEnergy(4.99, 99999)}
+                  className="w-full p-4 pl-5 rounded-xl border-2 border-cyan-500/80 bg-cyan-900/30 flex items-center justify-between hover:border-cyan-400 hover:bg-cyan-900/50 transition-all group shadow-[0_0_25px_rgba(6,182,212,0.3)]"
+                >
+                  <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')] opacity-20 group-hover:opacity-40 transition-opacity" />
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="text-4xl drop-shadow-[0_0_15px_rgba(6,182,212,0.8)] group-hover:scale-110 transition-transform">🐋</div>
+                    <div className="text-left">
+                      <div className="text-cyan-400 font-black text-lg uppercase tracking-wide">Whale Pass</div>
+                      <div className="text-[10px] text-cyan-200 font-bold uppercase tracking-widest mt-0.5">Batería Infinita (30 Días)</div>
+                    </div>
+                  </div>
+                  <div className="text-right relative z-10">
+                    <div className="text-white font-black text-2xl">4.99 TON</div>
                   </div>
                 </button>
               </div>
