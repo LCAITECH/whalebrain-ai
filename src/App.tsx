@@ -432,7 +432,10 @@ function WhaleBrainApp() {
 
   const selectCoin = async (coinId: string) => {
     // Mobile iOS: Desbloquear stream de audio sincrónicamente con el tap del usuario
-    if (soundEnabled && audioRef.current) audioRef.current.play().catch(() => { });
+    if (soundEnabled && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.play().catch(() => { });
+    }
 
     const cached = getCachedResult(coinId);
     if (cached) {
@@ -561,9 +564,10 @@ function WhaleBrainApp() {
     const inputText = typeof overrideText === 'string' ? overrideText : chatInput;
     if ((!inputText.trim() && !chatImage) || chatLoading) return;
 
-    // Mobile: Frenar el audio anterior si seguía sonando
+    // Mobile iOS: Frenar audio anterior y desbloquear el contexto de audio sincrónicamente en este click originario
     if (soundEnabled && audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.play().catch(() => { });
     }
 
     const finalInput = inputText.trim() || (chatImage ? "Che ballena, fíjate lo que te adjunto en esta imagen y tirame tu análisis Degen." : "");
@@ -855,7 +859,7 @@ function WhaleBrainApp() {
             className="flex items-center gap-2 px-4 py-2 rounded-full border bg-zinc-900/80 border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)] backdrop-blur-md hover:bg-cyan-900/40 transition-all group scale-100 hover:scale-105 active:scale-95"
           >
             <span className="text-sm font-black italic">{credits}</span>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 group-hover:text-cyan-400 transition-colors">⚡ BATERÍA</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 group-hover:text-cyan-400 transition-colors">⚡ ENERGÍA</span>
           </button>
         )}
 
