@@ -98,7 +98,7 @@ export default function App() {
 function WhaleBrainApp() {
   const [tonConnectUI] = useTonConnectUI();
   const [showEnergyStore, setShowEnergyStore] = useState(false);
-  const MASTER_WALLET = "0QDjUksLqfMkVV5wM4jI33hL92bX_wQ547wA23m2W-v8_8F"; // Test wallet placeholders
+  const MASTER_WALLET = "UQA-NgT-KI4FF17BSIxw1ZUsN0a0yEzARUECQwV7oS-f7pJv"; // Telegram Wallet Oficial
 
   const handleBuyEnergy = async (tonAmount: number, creditsToAdd: number) => {
     if (!tonConnectUI.connected) {
@@ -114,7 +114,6 @@ function WhaleBrainApp() {
           {
             address: MASTER_WALLET,
             amount: (tonAmount * 1e9).toString(), // Convert TON to nanoTON
-            payload: "TeEsT"
           }
         ]
       };
