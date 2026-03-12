@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
-import { TonConnectButton } from '@tonconnect/ui-react';
+import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
 import { CoinData, SearchResult, AnalysisResult, ChatMessage } from './types';
 import { analyzeCoin, chatWithWhale, summarizeForAudio } from './services/aiService';
 
@@ -96,6 +96,64 @@ export default function App() {
 }
 
 function WhaleBrainApp() {
+  const [tonConnectUI] = useTonConnectUI();
+  const [showEnergyStore, setShowEnergyStore] = useState(false);
+  const MASTER_WALLET = "0QDjUksLqfMkVV5wM4jI33hL92bX_wQ547wA23m2W-v8_8F"; // Test wallet placeholders
+
+  const handleBuyEnergy = async (tonAmount: number, creditsToAdd: number) => {
+    if (!tonConnectUI.connected) {
+      alert("Conectá tu wallet TON primero loco!");
+      return;
+    }
+    try {
+      setLoading(true);
+      setLoadingMessage('Generando contrato inteligente de recarga...');
+      const transaction = {
+        validUntil: Math.floor(Date.now() / 1000) + 360,
+        messages: [
+          {
+            address: MASTER_WALLET,
+            amount: (tonAmount * 1e9).toString(), // Convert TON to nanoTON
+            payload: "TeEsT"
+          }
+        ]
+      };
+
+      await tonConnectUI.sendTransaction(transaction);
+
+      // Actualizar Base de Datos
+      try {
+        const tgId = tgUser?.id;
+        if (tgId) {
+          const addRes = await fetch('/api/add-energy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telegram_id: tgId, creditsToAdd, txHash: 'optimistic' })
+          });
+          const addData = await addRes.json();
+          if (addData.newCredits) {
+            setCredits(addData.newCredits);
+          } else {
+            setCredits(prev => (prev || 0) + creditsToAdd); // fallback
+          }
+        } else {
+          setCredits(prev => (prev || 0) + creditsToAdd); // Fallback local
+        }
+      } catch (dbError) {
+        console.error('Fallo sumando en DB:', dbError);
+        setCredits(prev => (prev || 0) + creditsToAdd); // Optimistic Update Fallback
+      }
+
+      setShowEnergyStore(false);
+      alert(`¡Compra exitosa! Se acreditaron ${creditsToAdd} de Energía.`);
+    } catch (e) {
+      console.error(e);
+      alert("Transacción cancelada o fallida.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<CoinData | null>(null);
@@ -793,10 +851,13 @@ function WhaleBrainApp() {
         <TonConnectButton className="mb-2 shadow-[0_0_15px_rgba(0,152,234,0.3)] transition-all hover:scale-105" />
 
         {credits !== null && (
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full border bg-zinc-900/80 border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)] backdrop-blur-md">
+          <button
+            onClick={() => { triggerHaptic('heavy'); setShowEnergyStore(true); }}
+            className="flex items-center gap-2 px-4 py-2 rounded-full border bg-zinc-900/80 border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)] backdrop-blur-md hover:bg-cyan-900/40 transition-all group scale-100 hover:scale-105 active:scale-95"
+          >
             <span className="text-sm font-black italic">{credits}</span>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">⚡ ENERGÍA</span>
-          </div>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 group-hover:text-cyan-400 transition-colors">⚡ BATERÍA</span>
+          </button>
         )}
 
         <button
@@ -2030,6 +2091,101 @@ function WhaleBrainApp() {
           <a href="https://lcaitechs.com" target="_blank" rel="noopener noreferrer" className="hover:text-zinc-400 transition-colors">Acerca de LCA ITECH</a>
         </div>
       </footer>
+      <AnimatePresence>
+        {showEnergyStore && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            onClick={() => setShowEnergyStore(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              className="w-full max-w-md bg-[#0a0a0a] border border-cyan-500/50 rounded-3xl p-6 shadow-[0_0_30px_rgba(6,182,212,0.2)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+
+              <button
+                onClick={() => setShowEnergyStore(false)}
+                className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-black text-white italic uppercase mb-2">WHALE ENERGY</h2>
+                <p className="text-sm text-zinc-400">Recargá tus pilas y seguí escaneando el ecosistema.</p>
+              </div>
+
+              <div className="space-y-4">
+                {/* Pack 1 */}
+                <button
+                  onClick={() => handleBuyEnergy(0.5, 50)}
+                  className="w-full p-4 rounded-xl border border-zinc-800 bg-zinc-900/50 flex items-center justify-between hover:border-blue-500/50 hover:bg-blue-500/10 transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="text-2xl">🐟</div>
+                    <div className="text-left">
+                      <div className="text-white font-bold">Píldora Degen</div>
+                      <div className="text-xs text-blue-400">+50 Batería</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-white font-black">0.5 TON</div>
+                  </div>
+                </button>
+
+                {/* Pack 2 */}
+                <button
+                  onClick={() => handleBuyEnergy(1.5, 200)}
+                  className="w-full p-4 rounded-xl border border-zinc-800 bg-zinc-900/50 flex items-center justify-between hover:border-orange-500/50 hover:bg-orange-500/10 transition-all group relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 bg-orange-500 text-black text-[8px] font-black px-2 py-1 rounded-bl-lg uppercase tracking-widest">Popular</div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-2xl">🦈</div>
+                    <div className="text-left">
+                      <div className="text-white font-bold">Tanque Tiburón</div>
+                      <div className="text-xs text-orange-400">+200 Batería</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-white font-black">1.5 TON</div>
+                  </div>
+                </button>
+
+                {/* Pack 3 */}
+                <button
+                  onClick={() => handleBuyEnergy(5, 99999)}
+                  className="w-full p-4 pl-5 rounded-xl border border-cyan-500/50 bg-cyan-900/20 flex items-center justify-between hover:border-cyan-400 hover:bg-cyan-900/40 transition-all group shadow-[0_0_15px_rgba(6,182,212,0.2)]"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="text-3xl drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">🐋</div>
+                    <div className="text-left">
+                      <div className="text-cyan-400 font-bold uppercase tracking-wide">Whale Pass</div>
+                      <div className="text-[10px] text-cyan-300">Energía Infinita (30 Días)</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-white font-black">5 TON</div>
+                  </div>
+                </button>
+              </div>
+
+              <div className="mt-6 border-t border-zinc-800 pt-4 flex flex-col items-center gap-2">
+                {!tonConnectUI.connected ? (
+                  <p className="text-xs text-zinc-500 text-center mb-2">Debés conectar tu wallet primero.</p>
+                ) : null}
+                <TonConnectButton className="mx-auto" />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
