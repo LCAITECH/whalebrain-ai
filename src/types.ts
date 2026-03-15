@@ -2,6 +2,10 @@ export interface CoinData {
   id: string;
   symbol: string;
   name: string;
+  chain_id?: string;
+  fdv?: number;
+  liquidity?: { usd?: number };
+  txns?: { h24?: { buys: number; sells: number } };
   image: {
     large: string;
     small: string;
@@ -58,4 +62,15 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
   image?: string;
+}
+
+export interface TokenUnlock {
+  id: string;
+  name: string;
+  symbol: string;
+  date: string;
+  amount_unlocked: number;
+  price_impact_risk: 'Bajo' | 'Medio' | 'Alto' | 'Extremo';
+  description: string;
+  thumb: string;
 }
