@@ -1676,7 +1676,28 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONDE MÁXIMO 1 o 2 PÁRRAFOS UNICAMENTE Y SIN
                      <div key={idx} className="bg-zinc-800/50 p-6 rounded-2xl border border-zinc-700/50 hover:border-red-500/30 hover:bg-zinc-800/80 transition-all group">
                         <div className="flex items-start justify-between mb-4">
                            <div className="flex items-center gap-3">
-                             <img src={unlock.thumb} alt={unlock.name} className="w-10 h-10 rounded-full bg-zinc-700" />
+                             {unlock.thumb ? (
+                               <img 
+                                 src={unlock.thumb} 
+                                 alt={unlock.name} 
+                                 className="w-10 h-10 rounded-full bg-zinc-700 object-cover" 
+                                 referrerPolicy="no-referrer"
+                                 onError={(e) => {
+                                   (e.target as HTMLImageElement).style.display = 'none';
+                                   const parent = (e.target as HTMLImageElement).parentElement;
+                                   if (parent) {
+                                     const fallback = document.createElement('div');
+                                     fallback.className = 'w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-black text-sm uppercase border border-emerald-500/30';
+                                     fallback.innerText = unlock.symbol.charAt(0);
+                                     parent.appendChild(fallback);
+                                   }
+                                 }}
+                               />
+                             ) : (
+                               <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-black text-sm uppercase border border-emerald-500/30">
+                                 {unlock.symbol.charAt(0)}
+                               </div>
+                             )}
                              <div>
                                <h3 className="text-lg font-black text-white">{unlock.name}</h3>
                                <p className="text-xs text-zinc-500 font-mono">{unlock.symbol}</p>
