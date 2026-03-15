@@ -27,7 +27,7 @@ export async function GET(req: Request) {
                 amount_unlocked: 92650000,
                 price_impact_risk: "Alto",
                 description: "Gran desbloqueo de tokens para el equipo y los inversores iniciales. Presión de venta severa inminente.",
-                thumb: "https://assets.coingecko.com/coins/images/16547/thumb/photo_2023-03-29_21.47.00.jpeg"
+                thumb: "https://cryptologos.cc/logos/arbitrum-arb-logo.png"
             },
             {
                 id: "optimism",
@@ -37,7 +37,7 @@ export async function GET(req: Request) {
                 amount_unlocked: 31340000,
                 price_impact_risk: "Medio",
                 description: "Desbloqueo lineal mensual de Core Contributors.",
-                thumb: "https://assets.coingecko.com/coins/images/25244/thumb/Optimism.png"
+                thumb: "https://cryptologos.cc/logos/optimism-ethereum-op-logo.png"
             },
             {
                 id: "starknet",
@@ -47,7 +47,7 @@ export async function GET(req: Request) {
                 amount_unlocked: 64000000,
                 price_impact_risk: "Extremo",
                 description: "¡Atención Degen! Desbloqueo masivo en pocas horas correspondientes a Early Contributors.",
-                thumb: "https://assets.coingecko.com/coins/images/28087/thumb/starknet_logo.png"
+                thumb: "https://cryptologos.cc/logos/starknet-token-strk-logo.png"
             },
             {
                 id: "dydx",
@@ -57,7 +57,7 @@ export async function GET(req: Request) {
                 amount_unlocked: 1250000,
                 price_impact_risk: "Bajo",
                 description: "Desbloqueo de Liquidity Providers ordinario.",
-                thumb: "https://assets.coingecko.com/coins/images/17500/thumb/dydx.png"
+                thumb: "https://cryptologos.cc/logos/dydx-dydx-logo.png"
             },
             {
                 id: "aptos",
@@ -67,7 +67,7 @@ export async function GET(req: Request) {
                 amount_unlocked: 11310000,
                 price_impact_risk: "Alto",
                 description: "Desbloqueo de Fundación y Core Contributors. Estar atentos a short squeeze.",
-                thumb: "https://assets.coingecko.com/coins/images/26455/thumb/aptos_round.png"
+                thumb: "https://cryptologos.cc/logos/aptos-apt-logo.png"
             }
         ];
 
