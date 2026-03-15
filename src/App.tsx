@@ -8,8 +8,9 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
-import { CoinData, SearchResult, AnalysisResult, ChatMessage } from './types';
+import { CoinData, SearchResult, AnalysisResult, ChatMessage, TokenUnlock } from './types';
 import { analyzeCoin, chatWithWhale, summarizeForAudio } from './services/aiService';
+import { fetchUnlocks } from './services/unlocksService';
 import { CalculatorModal } from './components/CalculatorModal';
 
 // Error Boundary Component
@@ -158,11 +159,26 @@ function WhaleBrainApp() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<CoinData | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [unlocksData, setUnlocksData] = useState<TokenUnlock[]>([]);
+  const [fetchingUnlocks, setFetchingUnlocks] = useState(false);
   const [catchphraseComplete, setCatchphraseComplete] = useState(false);
 
   useEffect(() => {
     setCatchphraseComplete(false);
   }, [analysis]);
+
+  const [activeTab, setActiveTab] = useState<'tokens' | 'contracts' | 'wallets' | 'compare' | 'portfolio' | 'academy' | 'airdrops' | 'unlocks'>('tokens');
+
+  useEffect(() => {
+    if (activeTab === 'unlocks' && unlocksData.length === 0) {
+      setFetchingUnlocks(true);
+      fetchUnlocks().then(data => {
+        setUnlocksData(data);
+        setFetchingUnlocks(false);
+      }).catch(() => setFetchingUnlocks(false));
+    }
+  }, [activeTab]);
+
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('La ballena está nadando por la blockchain…');
   const [searching, setSearching] = useState(false);
@@ -238,7 +254,6 @@ function WhaleBrainApp() {
     }, 1500);
     return () => clearTimeout(timeout);
   }, [tgUser]);
-  const [activeTab, setActiveTab] = useState<'tokens' | 'contracts' | 'wallets' | 'compare' | 'portfolio' | 'academy' | 'airdrops'>('tokens');
   const [compareAddresses, setCompareAddresses] = useState({ addr1: '', addr2: '' });
   const [compareResults, setCompareResults] = useState<{ res1: AnalysisResult | null, res2: AnalysisResult | null }>({ res1: null, res2: null });
 
@@ -1443,6 +1458,7 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONDE MÁXIMO 1 o 2 PÁRRAFOS UNICAMENTE Y SIN
             { id: 'wallets', label: 'Billeteras', icon: User },
             { id: 'academy', label: 'Academia', icon: Brain },
             { id: 'airdrops', label: 'Airdrops', icon: Coins },
+            { id: 'unlocks', label: 'Unlocks', icon: Clock },
             { id: 'compare', label: 'Comparar', icon: ArrowLeftRight },
             { id: 'portfolio', label: 'Portfolio', icon: Briefcase },
           ].map((tab) => (
@@ -1635,6 +1651,83 @@ EL TEXTO SERÁ LEÍDO POR TTS, RESPONDE MÁXIMO 1 o 2 PÁRRAFOS UNICAMENTE Y SIN
                   </div>
                 </div>
               </div>
+            </div>
+          ) : activeTab === 'unlocks' ? (
+            <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 md:p-8 space-y-8 relative overflow-hidden">
+               {rataMode && <div className="absolute inset-0 bg-yellow-500/5 z-0 pointer-events-none" />}
+               <div className="text-center mb-8 relative z-10">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                    <Clock className="w-6 h-6 text-red-500 animate-pulse" />
+                  </div>
+                </div>
+                <h2 className="text-3xl font-black uppercase tracking-tight text-white mb-2">Token Unlocks</h2>
+                <p className="text-zinc-400">Rastreá la liberación inminente de tokens (presión de venta masiva) para evitar ser la liquidez de salida de los VC's.</p>
+              </div>
+
+              {fetchingUnlocks ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 text-emerald-500 animate-spin mb-4" />
+                  <p className="text-zinc-500 font-medium animate-pulse">Consultando calendario on-chain...</p>
+                </div>
+              ) : unlocksData.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+                  {unlocksData.map((unlock, idx) => (
+                     <div key={idx} className="bg-zinc-800/50 p-6 rounded-2xl border border-zinc-700/50 hover:border-red-500/30 hover:bg-zinc-800/80 transition-all group">
+                        <div className="flex items-start justify-between mb-4">
+                           <div className="flex items-center gap-3">
+                             <img src={unlock.thumb} alt={unlock.name} className="w-10 h-10 rounded-full bg-zinc-700" />
+                             <div>
+                               <h3 className="text-lg font-black text-white">{unlock.name}</h3>
+                               <p className="text-xs text-zinc-500 font-mono">{unlock.symbol}</p>
+                             </div>
+                           </div>
+                           <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-md ${
+                              unlock.price_impact_risk === 'Extremo' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                              unlock.price_impact_risk === 'Alto' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
+                              unlock.price_impact_risk === 'Medio' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                              'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                           }`}>
+                             Riesgo {unlock.price_impact_risk}
+                           </span>
+                        </div>
+                        <div className="space-y-3 mb-6">
+                           <div className="flex items-center justify-between border-b border-zinc-700 pb-2">
+                             <span className="text-xs font-bold text-zinc-500 uppercase">Monto</span>
+                             <span className="text-sm font-mono font-black text-rose-400">-{unlock.amount_unlocked.toLocaleString()} {unlock.symbol}</span>
+                           </div>
+                           <div className="flex items-center justify-between">
+                             <span className="text-xs font-bold text-zinc-500 uppercase">Fecha</span>
+                             <span className="text-sm font-black text-white">{new Date(unlock.date).toLocaleDateString()}</span>
+                           </div>
+                        </div>
+                        <p className="text-xs text-zinc-400 leading-relaxed mb-4 min-h-[40px]">{unlock.description}</p>
+                        
+                        {(!rataMode || degenMode || traderMode) && (
+                          <button
+                            onClick={() => {
+                              if (credits === null || credits < 1) {
+                                triggerToast('Batería insuficiente para el Veredicto Premium.');
+                                setShowEnergyStore(true);
+                                return;
+                              }
+                              setShowChat(true);
+                              const msg = `Analizá seriamente el unlock inminente de ${unlock.amount_unlocked} ${unlock.symbol} (${unlock.name}) programado para el ${new Date(unlock.date).toLocaleDateString()}. ¿Debo shortear fuertemente o es 'Priced In'?`;
+                              handleSendMessage(msg);
+                            }}
+                            className="w-full mt-auto flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-900 border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-500/50 transition-all font-black text-xs uppercase"
+                          >
+                           <Brain className="w-4 h-4" /> Veredicto I.A. (1 ⚡)
+                          </button>
+                        )}
+                     </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-zinc-500 py-12 border border-zinc-800 rounded-2xl border-dashed">
+                  No hay unlocks masivos reportados en este momento.
+                </div>
+              )}
             </div>
           ) : activeTab === 'compare' ? (
             <div className="space-y-8">
@@ -2761,7 +2854,7 @@ function NewsBubble() {
 
   useEffect(() => {
     const checkNews = async () => {
-      const lastDismissed = localStorage.getItem('whale_news_dismissed');
+      const lastDismissed = localStorage.getItem('whale_guru_news_dismissed');
       if (lastDismissed && Date.now() - parseInt(lastDismissed) < 1000 * 60 * 60 * 2) {
         // Ignorar si se cerró hace menos de 2 horas
         return;
@@ -2801,7 +2894,7 @@ function NewsBubble() {
               onClick={(e) => { 
                 e.stopPropagation(); 
                 setVisible(false); 
-                localStorage.setItem('whale_news_dismissed', Date.now().toString()); 
+                    localStorage.setItem('whale_guru_news_dismissed', Date.now().toString()); 
               }} 
               className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-0.5 hover:bg-rose-400 transition-colors shadow-lg z-20"
             >
@@ -2813,7 +2906,7 @@ function NewsBubble() {
               target="_blank"
               onClick={() => {
                 setVisible(false);
-                localStorage.setItem('whale_news_dismissed', Date.now().toString());
+                localStorage.setItem('whale_guru_news_dismissed', Date.now().toString());
               }}
               rel="noopener noreferrer" 
               className="flex items-start gap-3"
